@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.3</TargetFramework>
+    <AssemblyName>LunarDoggo.StartOptions</AssemblyName>
+    <RootNamespace>LunarDoggo.StartOptions</RootNamespace>
+    <Authors>Lunar Doggo</Authors>
+    <Company>-</Company>
+    <Product>StartOptionParser</Product>
+    <PackageTags>start options, start arguments</PackageTags>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Collections.Immutable" Version="1.7.1" />
+  </ItemGroup>
+
+</Project>
