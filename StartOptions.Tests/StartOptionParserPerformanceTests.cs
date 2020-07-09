@@ -18,7 +18,7 @@ namespace StartOptions.Tests
             StartOption[] options = this.GetSmallGrouplessStartOptionArray();
             string[] args = new string[] { "-?", "-g", "--option", "-v" };
 
-            this.AssertParsingIsFasterThanMilliseconds(15, groups, options, args);
+            this.AssertParsingIsFasterThanMilliseconds(50, groups, options, args);
         }
 
         private StartOptionGroup[] GetSmallStartOptionGroupArray()
@@ -47,7 +47,7 @@ namespace StartOptions.Tests
             StartOption[] options = this.GetBigGrouplessStartOptionArray();
             string[] args = new string[] { "-?", "-i", "--path=./import.sql", "--port=3306", "--server=127.0.0.1", "-t=users", "-f", "-v", "-u=root", "-s=dba" };
 
-            this.AssertParsingIsFasterThanMilliseconds(30, groups, options, args);
+            this.AssertParsingIsFasterThanMilliseconds(200, groups, options, args);
         }
 
         private StartOptionGroup[] GetBigStartOptionGroupArray()
