@@ -1,7 +1,7 @@
-﻿using LunarDoggo.StartOptions.Building;
+﻿using LunarDoggo.StartOptions.Exceptions;
+using LunarDoggo.StartOptions.Building;
 using LunarDoggo.StartOptions;
 using Xunit;
-using LunarDoggo.StartOptions.Exceptions;
 
 namespace StartOptions.Tests
 {

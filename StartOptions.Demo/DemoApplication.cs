@@ -76,7 +76,8 @@ namespace StartOptions.Demo
 
         protected override ApplicationStartOptions GetApplicationStartOptions()
         {
-            return new ApplicationStartOptions(this.GetStartOptionGroups(), this.GetGrouplessStartOptions());
+            return new ApplicationStartOptions(this.GetStartOptionGroups(), this.GetGrouplessStartOptions(),
+                                               this.GetHelpOptions(), this.GetStartOptionParserSettings());
         }
 
         private IEnumerable<StartOptionGroup> GetStartOptionGroups()
@@ -98,6 +99,31 @@ namespace StartOptions.Demo
             return new[]
             {
                 new StartOptionBuilder("verbose", "v").SetDescription("Enable verbose output").Build()
+            };
+        }
+
+        private IEnumerable<HelpOption> GetHelpOptions()
+        {
+            return new HelpOption[]
+            {
+                new HelpOption("help", false),
+                new HelpOption("h", true)
+            };
+        }
+
+        private StartOptionParserSettings GetStartOptionParserSettings()
+        {
+            // Use "/" as prefix for long option names like "/add" or "/help"
+            // Use "-" as prefix for short option names like "-a" or "-h"
+            // Separate values from the corresponding start option with a space
+            // Examples start options: 
+            // /> .\StartOptions.Demo.exe /add -1 3 /value-2 5
+            // /> .\StartOptions.Demo.exe -h
+            return new StartOptionParserSettings()
+            {
+                LongOptionNamePrefix = "/",
+                ShortOptionNamePrefix = "-",
+                OptionValueSeparator = ' '
             };
         }
     }

@@ -50,7 +50,7 @@ namespace LunarDoggo.StartOptions
         {
             if (this.valueParser != null)
             {
-                this.value = this.valueParser.ParseSingle(value);
+                this.value = this.valueParser.ParseValue(value);
             }
             else
             {
@@ -62,7 +62,7 @@ namespace LunarDoggo.StartOptions
         {
             if (this.valueParser != null)
             {
-                this.value = this.valueParser.ParseMultiple(values);
+                this.value = this.valueParser.ParseValues(values);
             }
             else
             {

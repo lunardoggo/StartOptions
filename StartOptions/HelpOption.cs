@@ -6,7 +6,7 @@ namespace LunarDoggo.StartOptions
 {
     public class HelpOption : IClonable<HelpOption>
     {
-        internal HelpOption(string name, bool isShortName)
+        public HelpOption(string name, bool isShortName)
         {
             this.IsShortName = isShortName;
             this.Name = name;

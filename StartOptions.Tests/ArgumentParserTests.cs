@@ -1,10 +1,7 @@
-﻿using LunarDoggo.StartOptions.Interfaces;
+﻿using LunarDoggo.StartOptions.Parsing.Arguments;
 using LunarDoggo.StartOptions.Parsing;
-using LunarDoggo.StartOptions.Parsing.Arguments;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Xunit;
 
 namespace StartOptions.Tests

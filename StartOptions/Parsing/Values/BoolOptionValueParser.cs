@@ -1,13 +1,15 @@
-﻿using System.Linq;
-using System;
+﻿using System;
 
 namespace LunarDoggo.StartOptions.Parsing.Values
 {
-    public class BoolOptionValueParser : IStartOptionValueParser
+    public class BoolOptionValueParser : AbstractStartOptionValueParser
     {
-        public object ParseSingle(string value)
+        public BoolOptionValueParser() : base(typeof(Boolean))
+        { }
+
+        protected override object ParseSingleValue(string value)
         {
-            if (Boolean.TryParse(value, out bool boolValue))
+            if(Boolean.TryParse(value, out bool boolValue))
             {
                 return boolValue;
             }
@@ -15,12 +17,7 @@ namespace LunarDoggo.StartOptions.Parsing.Values
             {
                 return longValue != 0;
             }
-            throw new ArgumentException($"Value \"{value}\" couldn't be parsed to Boolean");
-        }
-
-        public object[] ParseMultiple(string[] values)
-        {
-            return values.Select(_value => this.ParseSingle(_value)).ToArray();
+            throw new FormatException($"\"{value}\" is neither a boolean nor a number.");
         }
     }
 }

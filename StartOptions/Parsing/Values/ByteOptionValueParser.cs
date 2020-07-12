@@ -2,14 +2,14 @@
 
 namespace LunarDoggo.StartOptions.Parsing.Values
 {
-    public class Int32OptionValueParser : AbstractStartOptionValueParser
+    public class ByteOptionValueParser : AbstractStartOptionValueParser
     {
-        public Int32OptionValueParser() : base(typeof(Int32))
+        public ByteOptionValueParser() : base(typeof(Byte))
         { }
 
         protected override object ParseSingleValue(string value)
         {
-            return Int32.Parse(value);
+            return Byte.Parse(value);
         }
     }
 }

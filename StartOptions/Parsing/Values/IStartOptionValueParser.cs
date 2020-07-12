@@ -2,7 +2,7 @@
 {
     public interface IStartOptionValueParser
     {
-        object[] ParseMultiple(string[] values);
-        object ParseSingle(string value);
+        object[] ParseValues(string[] values);
+        object ParseValue(string value);
     }
 }
