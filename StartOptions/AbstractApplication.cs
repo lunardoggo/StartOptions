@@ -28,7 +28,7 @@ namespace LunarDoggo.StartOptions
             }
         }
 
-        private void PrintHelpPage(ParsedStartOptions parsed)
+        protected virtual void PrintHelpPage(ParsedStartOptions parsed)
         {
             IEnumerable<StartOptionGroup> groups = parsed.ParsedOptionGroup == null
                     ? this.options.StartOptionGroups : new[] { parsed.ParsedOptionGroup };

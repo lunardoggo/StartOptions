@@ -6,9 +6,16 @@
     <RootNamespace>LunarDoggo.StartOptions</RootNamespace>
     <Authors>Lunar Doggo</Authors>
     <Company>-</Company>
-    <Product>StartOptionParser</Product>
+    <Product>StartOptions</Product>
     <PackageTags>start options, start arguments</PackageTags>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageLicenseFile></PackageLicenseFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/lunardoggo/StartOptions</PackageProjectUrl>
+    <RepositoryUrl></RepositoryUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Copyright>Lunar Doggo</Copyright>
+    <Description>This Library allows you to define your desired application start arguments in an uniform way. The console start arguments are parsed into StartOptions and StartOptionGroups which you can use to select your applications behaviour and pass values to your application via the console.</Description>
   </PropertyGroup>
 
   <ItemGroup>
