@@ -11,15 +11,15 @@ A `StartOption` is a single commandline argument that may contain values. StartO
             .SetRequired(bool required = true) //Specify if the StartOption must be set on the commandline
             .Build(); //Create a instance of StartOption from the previously chained parameters
             
-A `StartOptionGroup` is a grouping of StartOptions with a specific name. The StartOptionGroup-commandline-argument may not contain a value, a StartOptionGroup requires at least one subordinate StartOption. Also note that you can only use one StartOptionGroup at once when calling your application. StartOptionGroups can be built using a `StartOptionBuilder` with the following methods:
+A `StartOptionGroup` is a grouping of StartOptions and has a specific name. The StartOptionGroup-commandline-argument must not contain a value, a StartOptionGroup requires at least one subordinate StartOption to be defined. Also note that you can only use one StartOptionGroup at once when calling your application. StartOptionGroups can be built using a `StartOptionBuilder` with the following methods:
 
     new StartOptionGroupBuilder(string longName, string shortName)
-            .AddOption(string longName, string shortName, Action<StartOptionBuilder> buildAction) //Add a StartOption to the group; in buildAction you can use all methods of StartOptionBuilder except StartOptionBuilder.Build()
+            .AddOption(string longName, string shortName, Action<StartOptionBuilder> buildAction) //Add a subordinage StartOption to the group; in buildAction you can use all methods of StartOptionBuilder except StartOptionBuilder.Build() (see example below)
             .AddOption(StartOption option) //Alternative to the other StartOptionGroupBuilder.AddOption-method if you built your groups StartOptions beforehand
             .SetDescription(string description) //Description that is displayed on the help-page
             .Build(); //Create a instance of StartOptionGroup from the previously chained parameters
 
-A `StartOptionParser` takes the commandline arguments and parses them into `StartOptionGroup`s and `StartOption`s which you can use to determine the inputs from the cli:
+A `StartOptionParser` takes the commandline arguments and parses them into an optional `StartOptionGroup` and `StartOption`s which you can use to determine the inputs from the cli. A StartOptionBuilder can be built using one of its constructors, if you use `AbstractApplication`, you don't need to use this class:
 
     StartOptionParser parser = new StartOptionParser(StartOptionParserSettings settings, //Your customized parser settings, for default settings just use new StartOptionParserSettings() 
                                                      IEnumerable<StartOptionGroup> groups, //All StartOptionGroups your application will be able to distinguish; can be null
@@ -32,7 +32,7 @@ You can also use a Simpler constructor of StartOptionParser which will use the d
 
     StartOptionParser(IEnumerable<StartOptionGroup> groups, IEnumerable<StartOption> grouplessOptions)
 
-An `AbstractApplication` is a base type that creates a StartOptionParser and handles its output. You must override the following methods:
+An `AbstractApplication` is a base type that creates a StartOptionParser, passes your applications commandline arguments to it and handles its output. You must override the following methods:
 
     protected abstract void PrintHelpPage(StartOptionParserSettings settings, IEnumerable<HelpOption> helpOptions, IEnumerable<StartOptionGroup> groups, IEnumerable<StartOption> grouplessOptions); //Print your help-page if the commandline arguments containes a HelpOption
     protected abstract void Run(StartOptionGroup selectedGroup, IEnumerable<StartOption> selectedGrouplessOptions); //Run your application code with the parsed StartOptionGroup and groupless StartOptions
@@ -46,11 +46,11 @@ An `AbstractApplication` is a base type that creates a StartOptionParser and han
     public ApplicationStartOptions(IEnumerable<StartOptionGroup> groups, IEnumerable<StartOption> grouplessOptions)
 ---
 # Usage
-Create a new class that inherits from `AbstractApplication` and override its abstract methods:
+In order to use the easiest interface to this library, create a new class that inherits from `AbstractApplication` and override its abstract methods:
     
     class DemoApplication : AbstractApplication
     
-Set your ApplicationStartOptions inside of `GetApplicationStartOptions`:
+Set your ApplicationStartOptions inside of `GetApplicationStartOptions`, note that valid StartOption names must start with either a letter or a number and can only contain letters, numbers, underscores and hyphens/dashes. Also note, that you can also provide custom HelpOptions and StartOptionParserSettings in this method (see Demo-Project):
 
     protected override ApplicationStartOptions GetApplicationStartOptions()
     {
@@ -70,7 +70,7 @@ Set your ApplicationStartOptions inside of `GetApplicationStartOptions`:
         return new ApplicationStartOptions(groups, grouplessOptions);
     }
     
-Set the logic for printing help-pages inside of `PrintHelpPage`:
+Set the logic for printing help-pages inside of `PrintHelpPage`. You can use the predefined class `ConsoleHelpPrinter` or define your own method of displaying a help page to your user:
 
     protected override void PrintHelpPage(StartOptionParserSettings settings, IEnumerable<HelpOption> helpOptions, IEnumerable<StartOptionGroup> groups, IEnumerable<StartOption> grouplessOptions)
     {
@@ -127,4 +127,17 @@ Call your application from the commandline, eg.:
 
     /> .\DemoApplication.exe --add -1=10 -2=5 --verbose -h
 
-In this example, your application will be using the "add"-StartOptionGroup with the subordinate StartOptions "value-1" (value = 10) and "value-2" (value = 5), the verbose-flag is set. As the HelpOption "h" is also used, your application will display the help-page for the provided commandline arguments without actually executing the operation, in order to run the addition, just omit this option.
+In this example, your application will be using the "add"-StartOptionGroup with the subordinate StartOptions "value-1" (value = 10) and "value-2" (value = 5), the verbose-flag is set. As the HelpOption "h" is also used, your application will display the help-page for the provided commandline arguments without actually executing the operation, in order to run the addition, just omit the "-h" option.
+
+Please note, that the help printer by default only displays all options if your commandline arguments only contained HelpOptions if they contained StartOptions or StartOptionGroups, the help page will only contain descriptions to the provided options. To change this behaviour, override the following Method in your Application-class:
+    
+    protected override void PrintHelpPage(ParsedStartOptions parsed)
+    {
+        //The following four lines assume, that you defined methods for getting your StartOptionParserSettings, StartOptionGroups, StartOptions and HelpOptions
+        StartOptionParserSettings settings = this.GetStartOptionParserSettings();
+        IEnumerable<StartOptionGroup> groups = this.GetStartOptionGroups();
+        IEnumerable<HelpOption> helpOptions = this.getHelpOptions();
+        IEnumerable<StartOption> options = this.GetStartOptions();
+
+        this.PrintHelpPage(settings, helpOptions, groups, options);
+    }

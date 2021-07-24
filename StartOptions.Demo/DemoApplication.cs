@@ -12,9 +12,11 @@ namespace StartOptions.Demo
 {
     public class DemoApplication : AbstractApplication
     {
+        private readonly IHelpPagePrinter helpPrinter = new ConsoleHelpPrinter('\t');
+
         protected override void PrintHelpPage(StartOptionParserSettings settings, IEnumerable<HelpOption> helpOptions, IEnumerable<StartOptionGroup> groups, IEnumerable<StartOption> grouplessOptions)
         {
-            new ConsoleHelpPrinter('\t').Print(settings, helpOptions, groups, grouplessOptions);
+            this.helpPrinter.Print(settings, helpOptions, groups, grouplessOptions);
         }
 
         protected override void Run(StartOptionGroup selectedGroup, IEnumerable<StartOption> selectedGrouplessOptions)
