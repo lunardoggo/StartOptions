@@ -112,6 +112,9 @@ namespace StartOptions.Tests
             Assert.Contains(secondOptions.ParsedOptionGroup.Options, _option => _option.ShortName.Equals("go"));
             Assert.Contains(secondOptions.ParsedGrouplessOptions, _option => _option.ShortName.Equals("r"));
             Assert.Contains(secondOptions.ParsedGrouplessOptions, _option => _option.ShortName.Equals("o"));
+
+            //Make sure that a request for the help-page ignores the option requirements
+            parser.Parse(new string[] { "-h" });
         }
 
         [Fact]
@@ -125,6 +128,9 @@ namespace StartOptions.Tests
             ParsedStartOptions firstOptions = parser.Parse(new string[] { "-g", "-gr", "-r" });
             Assert.NotNull(firstOptions.ParsedOptionGroup);
             Assert.Contains(firstOptions.ParsedOptionGroup.Options, _option => _option.ShortName.Equals("gr"));
+
+            //Make sure that a request for the help-page ignores the option group requirements
+            parser.Parse(new string[] { "-h" });
         }
 
         private StartOptionParser GetOptionParserWithRequiredOptions()

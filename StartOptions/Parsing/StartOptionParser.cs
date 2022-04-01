@@ -87,7 +87,10 @@ namespace LunarDoggo.StartOptions.Parsing
 
             this.validator.CheckUnknownStartOptions(parsedOptions);
             ParsedStartOptions output = new ParsedStartOptions(parsedGroup, parsedGrouplessOptions, wasHelpRequested);
-            this.validator.CheckOptionRequirements(output);
+            if (!wasHelpRequested)
+            {
+                this.validator.CheckOptionRequirements(output);
+            }
             return output;
         }
 
