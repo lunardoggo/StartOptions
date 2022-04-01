@@ -16,12 +16,12 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Copyright>Lunar Doggo</Copyright>
     <Description>This Library allows you to define your desired application start arguments in an uniform way. The console start arguments are parsed into StartOptions and StartOptionGroups which you can use to select your applications behaviour and pass values to your application via the console.</Description>
-    <AssemblyVersion>1.0.1</AssemblyVersion>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon></PackageIcon>
     <FileVersion>1.0.0</FileVersion>
-	<VersionPrefix>1.0.1</VersionPrefix>
-	<PackageReleaseNotes>Fixed requirement notification for StartOptions and StartOptionGroups</PackageReleaseNotes>
+	<VersionPrefix>1.0.2</VersionPrefix>
+    <AssemblyVersion>1.0.2</AssemblyVersion>
+	<PackageReleaseNotes>Hotfix: StartOption and StartOptionGroup requirements are not ignored if the help page is requested by the user</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
