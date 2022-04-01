@@ -24,19 +24,21 @@ namespace LunarDoggo.StartOptions.Parsing
 
         private readonly IEnumerable<StartOptionGroup> optionGroups;
         private readonly IEnumerable<StartOption> grouplessOptions;
+        private readonly StartOptionParserValidator validator;
         private readonly StartOptionParserSettings settings;
         private readonly HelpOption[] helpOptions;
 
         public StartOptionParser(StartOptionParserSettings settings, IEnumerable<StartOptionGroup> groups,
                                  IEnumerable<StartOption> grouplessOptions, IEnumerable<HelpOption> helpOptions)
         {
+            this.settings = settings.Clone();
+
             this.grouplessOptions = this.GetCopiedOptions(grouplessOptions);
             this.helpOptions = this.GetCopiedHelpOptions(helpOptions);
             this.optionGroups = this.GetCopiedOptionGroups(groups);
-            this.settings = settings.Clone();
+            this.validator = this.GetValidator();
 
-            StartOptionParserValidator validator = this.GetValidator();
-            validator.CheckNameConflicts();
+            this.validator.CheckNameConflicts();
         }
 
         private StartOptionParserValidator GetValidator()
@@ -83,8 +85,10 @@ namespace LunarDoggo.StartOptions.Parsing
             StartOptionGroup parsedGroup = this.GetStartOptionGroup(ref parsedOptions);
             IEnumerable<StartOption> parsedGrouplessOptions = this.GetStartOptions(this.grouplessOptions, ref parsedOptions);
 
-            this.CheckUnknownStartOptions(parsedOptions);
-            return new ParsedStartOptions(parsedGroup, parsedGrouplessOptions, wasHelpRequested);
+            this.validator.CheckUnknownStartOptions(parsedOptions);
+            ParsedStartOptions output = new ParsedStartOptions(parsedGroup, parsedGrouplessOptions, wasHelpRequested);
+            this.validator.CheckOptionRequirements(output);
+            return output;
         }
 
         private IEnumerable<ParsedStartArgument> GetParsedStartOptions(string[] args)
@@ -188,16 +192,6 @@ namespace LunarDoggo.StartOptions.Parsing
             else
             {
                 return allOptions.SingleOrDefault(_group => _group.LongName.Equals(option.Name));
-            }
-        }
-
-        private void CheckUnknownStartOptions(List<ParsedStartArgument> remainingOptions)
-        {
-            if (this.settings.ThrowErrorOnUnknownOption && remainingOptions.Count > 0)
-            {
-                string[] names = remainingOptions.Select(_option => _option.NameWithPrefix).ToArray();
-                int count = names.Length;
-                throw new UnknownOptionNameException($"Encountered unknown start option{(count == 1 ? "" : "s")}: {String.Join(", ", names)}");
             }
         }
     }

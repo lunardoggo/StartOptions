@@ -9,6 +9,7 @@ namespace LunarDoggo.StartOptions.Parsing
     {
         private readonly IEnumerable<StartOptionGroup> optionGroups;
         private readonly IEnumerable<StartOption> grouplessOptions;
+        private readonly StartOptionParserSettings settings;
         private readonly HelpOption[] helpOptions;
 
         internal StartOptionParserValidator(StartOptionParserSettings settings, IEnumerable<StartOptionGroup> groups,
@@ -17,13 +18,22 @@ namespace LunarDoggo.StartOptions.Parsing
             this.grouplessOptions = grouplessOptions;
             this.helpOptions = helpOptions;
             this.optionGroups = groups;
-            
-            if(settings == null)
+            this.settings = settings;
+
+            if (settings == null)
             {
                 throw new ArgumentException("StartOptionParserSettings can't be null");
             }
+        }
 
-            this.CheckNameConflicts();
+        public void CheckUnknownStartOptions(List<ParsedStartArgument> remainingOptions)
+        {
+            if (this.settings.ThrowErrorOnUnknownOption && remainingOptions.Count > 0)
+            {
+                string[] names = remainingOptions.Select(_option => _option.NameWithPrefix).ToArray();
+                int count = names.Length;
+                throw new UnknownOptionNameException($"Encountered unknown start option{(count == 1 ? "" : "s")}: {String.Join(", ", names)}");
+            }
         }
 
         public void CheckNameConflicts()
@@ -32,6 +42,47 @@ namespace LunarDoggo.StartOptions.Parsing
             this.CheckStartOptionGroupNameConflicts();
             this.CheckStartOptionGroupGrouplessOptionsNameConflicts();
             this.CheckHelpOptionNameConflicts();
+        }
+
+        public void CheckOptionRequirements(ParsedStartOptions parsedOptions)
+        {
+            if (this.settings.RequireStartOptionGroup)
+            {
+                if (parsedOptions.ParsedOptionGroup is null)
+                {
+                    throw new OptionRequirementException("At least one StartOptionGroup must be selected");
+                }
+            }
+
+            if (!(parsedOptions.ParsedOptionGroup is null))
+            {
+                StartOptionGroup selected = this.optionGroups.Single(_group => _group.LongName.Equals(parsedOptions.ParsedOptionGroup.LongName));
+                string[] missingGroupOptions = this.GetMissingRequiredOptions(parsedOptions.ParsedOptionGroup.Options, selected.Options);
+
+                if (missingGroupOptions.Length > 0)
+                {
+                    throw new OptionRequirementException($"The StartOptions \"{String.Join("\", \"", missingGroupOptions)}\" are required to be set for StartOptionGroup \"{selected.LongName}\"");
+                }
+            }
+
+            string[] missingGrouplessOptions = this.GetMissingRequiredOptions(parsedOptions.ParsedGrouplessOptions, this.grouplessOptions);
+            if(missingGrouplessOptions.Length > 0)
+            {
+                throw new OptionRequirementException($"The groupless StartOptions \"{String.Join("\", \"", missingGrouplessOptions)}\" are required to be set");
+            }
+        }
+
+        private string[] GetMissingRequiredOptions(IEnumerable<StartOption> parsedOptions, IEnumerable<StartOption> availableOptions)
+        {
+            List<string> missing = new List<string>();
+            foreach (StartOption option in availableOptions.Where(_option => _option.IsRequired))
+            {
+                if (parsedOptions.SingleOrDefault(_parsed => _parsed.LongName.Equals(option.LongName)) is null)
+                {
+                    missing.Add(option.LongName);
+                }
+            }
+            return missing.ToArray();
         }
 
         private void CheckGrouplessStartOptionNameConflicts()

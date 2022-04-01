@@ -115,6 +115,7 @@ namespace StartOptions.Demo
 
         private StartOptionParserSettings GetStartOptionParserSettings()
         {
+            // Require at least one StartOptionGroup to be provided in the cli arguments
             // Use "/" as prefix for long option names like "/add" or "/help"
             // Use "-" as prefix for short option names like "-a" or "-h"
             // Separate values from the corresponding start option with a space
@@ -123,9 +124,10 @@ namespace StartOptions.Demo
             // /> .\StartOptions.Demo.exe -h
             return new StartOptionParserSettings()
             {
-                LongOptionNamePrefix = "/",
+                RequireStartOptionGroup = true,
                 ShortOptionNamePrefix = "-",
-                OptionValueSeparator = ' '
+                LongOptionNamePrefix = "/",
+                OptionValueSeparator = ' ',
             };
         }
     }
