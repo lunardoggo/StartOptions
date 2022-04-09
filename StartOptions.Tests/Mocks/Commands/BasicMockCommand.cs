@@ -7,7 +7,7 @@ namespace StartOptions.Tests.Mocks.Commands
     {
         private readonly double firstNumber, secondNumber;
         private readonly CalculationOperation operation;
-        private bool verbose;
+        private readonly bool verbose;
 
         [StartOptionGroup("calculate", "c", Description = "Executes a calculation")]
         public BasicMockCommand([StartOption("number1", "n1", Description = "First number of the calculation", Mandatory = true, ValueType = StartOptionValueType.Single)]double firstNumber,

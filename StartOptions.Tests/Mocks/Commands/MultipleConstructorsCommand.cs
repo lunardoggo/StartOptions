@@ -34,6 +34,12 @@ namespace StartOptions.Tests.Mocks.Commands
             };
         }
 
+        //This constructor will be ignored by the reflection helper
+        public MultipleConstructorsCommand(object input)
+        {
+            this.action = () => Console.WriteLine("obj: {0}", input);
+        }
+
         public bool Execute()
         {
             this.action.Invoke();

@@ -1,7 +1,9 @@
-﻿using LunarDoggo.StartOptions.Reflection;
+﻿using LunarDoggo.StartOptions.Exceptions;
+using LunarDoggo.StartOptions.Reflection;
 using StartOptions.Tests.Mocks.Commands;
 using LunarDoggo.StartOptions;
 using System.Linq;
+using System;
 using Xunit;
 
 namespace StartOptions.Tests
@@ -44,6 +46,31 @@ namespace StartOptions.Tests
             this.AssertStartOptionGroup("remove", "r", "Removes a value from the stored list", remove);
             this.AssertStartOption("value", "v", "Value to be added", true, StartOptionValueType.Single, remove.GetOptionByShortName("v"));
             this.AssertStartOption("ignoreErrors", "i", "Ignores the error if the value is not present in the list", false, StartOptionValueType.Switch, remove.GetOptionByShortName("i"));
+        }
+
+        [Fact]
+        public void TestConstructorNameConflicts()
+        {
+            Assert.Throws<NameConflictException>(() => ReflectionHelper.GetStartOptions(typeof(GroupLongNameConflictCommand)));
+            Assert.Throws<NameConflictException>(() => ReflectionHelper.GetStartOptions(typeof(GroupLongShortNameConflictCommand)));
+            Assert.Throws<NameConflictException>(() => ReflectionHelper.GetStartOptions(typeof(OptionLongShortNameConflictCommand)));
+            Assert.Throws<NameConflictException>(() => ReflectionHelper.GetStartOptions(typeof(GrouplessOptionLongShortNameConflictCommand)));
+            Assert.Throws<NameConflictException>(() => ReflectionHelper.GetStartOptions(typeof(GroupShortNameConflictCommand)));
+            Assert.Throws<NameConflictException>(() => ReflectionHelper.GetStartOptions(typeof(OptionLongNameConflictCommand)));
+            Assert.Throws<NameConflictException>(() => ReflectionHelper.GetStartOptions(typeof(OptionShortNameConflictCommand)));
+            Assert.Throws<NameConflictException>(() => ReflectionHelper.GetStartOptions(typeof(GroupOptionLongNameConflictCommand)));
+            Assert.Throws<NameConflictException>(() => ReflectionHelper.GetStartOptions(typeof(GroupOptionShortNameConflictCommand)));
+            Assert.Throws<NameConflictException>(() => ReflectionHelper.GetStartOptions(typeof(GroupGrouplessOptionLongNameConflictCommand)));
+            Assert.Throws<NameConflictException>(() => ReflectionHelper.GetStartOptions(typeof(GroupGrouplessOptionShortNameConflictCommand)));
+            Assert.Throws<NameConflictException>(() => ReflectionHelper.GetStartOptions(typeof(OptionGrouplessOptionLongNameConflictCommand)));
+            Assert.Throws<NameConflictException>(() => ReflectionHelper.GetStartOptions(typeof(OptionGrouplessOptionShortNameConflictCommand)));
+        }
+
+        [Fact]
+        public void TestMiscellaneousExceptions()
+        {
+            Assert.Throws<NotSupportedException>(() => ReflectionHelper.GetStartOptions(typeof(UnrelatedConstructorParameterCommand)));
+            Assert.Throws<InvalidOperationException>(() => ReflectionHelper.GetStartOptions(typeof(AbstractParameterCommand)));
         }
 
         private void AssertStartOptionGroup(string longName, string shortName, string description, StartOptionGroup group)
