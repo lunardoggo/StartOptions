@@ -17,10 +17,10 @@ namespace StartOptions.Tests.Mocks.Commands
     }
 
     //Should trow an InvalidOperationException
-    public abstract class AbstractParameterCommand : IApplicationCommand
+    public abstract class NotACommandCommand
     {
         [StartOptionGroup("group", "g")]
-        public AbstractParameterCommand([StartOption("option", "o")]string option)
+        public NotACommandCommand([StartOption("option", "o")] string option)
         { }
 
         public bool Execute()
@@ -29,24 +29,11 @@ namespace StartOptions.Tests.Mocks.Commands
         }
     }
 
-    //Should throw a NameConflictException
-    public class GroupLongShortNameConflictCommand : IApplicationCommand
-    {
-        [StartOptionGroup("group", "group")]
-        public GroupLongShortNameConflictCommand([StartOption("option", "o")] string option)
-        { }
-
-        public bool Execute()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    //Should throw a NameConflictException
-    public class OptionLongShortNameConflictCommand : IApplicationCommand
+    //Should trow an InvalidOperationException
+    public abstract class AbstractClassCommand : IApplicationCommand
     {
         [StartOptionGroup("group", "g")]
-        public OptionLongShortNameConflictCommand([StartOption("option", "option")] string option)
+        public AbstractClassCommand([StartOption("option", "o")]string option)
         { }
 
         public bool Execute()
@@ -55,11 +42,11 @@ namespace StartOptions.Tests.Mocks.Commands
         }
     }
 
-    //Should throw a NameConflictException
-    public class GrouplessOptionLongShortNameConflictCommand : IApplicationCommand
+    //Should trow an InvalidOperationException
+    public class GenericClassCommand<T> : IApplicationCommand
     {
-        [StartOptionGroup("group", "group")]
-        public GrouplessOptionLongShortNameConflictCommand([StartOption("option", "o")] string option, [StartOption("value", "value", IsGrouplessOption = true)]string value)
+        [StartOptionGroup("group", "g")]
+        public GenericClassCommand([StartOption("option", "o")] T option)
         { }
 
         public bool Execute()
@@ -202,6 +189,19 @@ namespace StartOptions.Tests.Mocks.Commands
         [StartOptionGroup("group", "g")]
         public OptionGrouplessOptionShortNameConflictCommand([StartOption("option1", "o")] string option1,
                                                              [StartOption("option2", "o", IsGrouplessOption = true)] string option2)
+        { }
+
+        public bool Execute()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    //Should throw a NameConflictException
+    public class HelpOptionNameConflictCommand : IApplicationCommand
+    {
+        [StartOptionGroup("group", "g")]
+        public HelpOptionNameConflictCommand([StartOption("help", "o")] string option)
         { }
 
         public bool Execute()

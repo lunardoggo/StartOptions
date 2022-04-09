@@ -117,6 +117,21 @@ namespace LunarDoggo.StartOptions.Parsing
                 string message = $"Conflicting short start option group name{(longNameConflicts.Length == 1 ? "" : "s")}: {String.Join(",", longNameConflicts)}";
                 throw new NameConflictException(message);
             }
+
+            foreach(StartOptionGroup group in this.optionGroups)
+            {
+                string[] intraGroupShortNameConflics = this.GetNameConflicts(group.Options.Select(_option => _option.ShortName).Concat(new[] { group.ShortName }));
+                if(intraGroupShortNameConflics.Length > 0)
+                {
+                    throw new NameConflictException($"Conflict in group \"{group.LongName}\": an option of the group has the same short name");
+                }
+
+                string[] intraGroupLongNameConflics = this.GetNameConflicts(group.Options.Select(_option => _option.LongName).Concat(new[] { group.LongName }));
+                if(intraGroupLongNameConflics.Length > 0)
+                {
+                    throw new NameConflictException($"Conflict in group \"{group.LongName}\": an option of the group has the same long name");
+                }
+            }
         }
 
         private void CheckStartOptionGroupGrouplessOptionsNameConflicts()
@@ -171,7 +186,7 @@ namespace LunarDoggo.StartOptions.Parsing
             }
 
             IEnumerable<string> longNames = this.grouplessOptions.Select(_option => _option.LongName);
-            string[] longHelpConflicts = this.GetHelpOptionNameConflicts(longNames, true);
+            string[] longHelpConflicts = this.GetHelpOptionNameConflicts(longNames, false);
             if (longHelpConflicts.Length > 0)
             {
                 bool hasOne = longHelpConflicts.Length == 1;
@@ -209,7 +224,7 @@ namespace LunarDoggo.StartOptions.Parsing
             }
 
             IEnumerable<string> longNames = group.Options.Select(_option => _option.LongName);
-            string[] longNameConflicts = this.GetHelpOptionNameConflicts(shortNames, false);
+            string[] longNameConflicts = this.GetHelpOptionNameConflicts(longNames, false);
             if (longNameConflicts.Length > 0)
             {
                 bool hasOne = longNameConflicts.Length == 1;

@@ -1,6 +1,8 @@
 ﻿using LunarDoggo.StartOptions.Exceptions;
 using LunarDoggo.StartOptions.Reflection;
 using StartOptions.Tests.Mocks.Commands;
+using LunarDoggo.StartOptions.Parsing;
+using System.Collections.Generic;
 using LunarDoggo.StartOptions;
 using System.Linq;
 using System;
@@ -13,7 +15,7 @@ namespace StartOptions.Tests
         [Fact]
         public void TestGetStartOptions()
         {
-            ApplicationStartOptions options = ReflectionHelper.GetStartOptions(typeof(BasicMockCommand));
+            ApplicationStartOptions options = this.GetDefaultReflectionHelper().GetStartOptions(typeof(BasicMockCommand));
 
             Assert.True(options.StartOptionGroups.Count() == 1);
             StartOptionGroup group = options.StartOptionGroups.Single();
@@ -29,7 +31,7 @@ namespace StartOptions.Tests
         [Fact]
         public void TestMultipleConstructors()
         {
-            ApplicationStartOptions options = ReflectionHelper.GetStartOptions(typeof(MultipleConstructorsCommand));
+            ApplicationStartOptions options = this.GetDefaultReflectionHelper().GetStartOptions(typeof(MultipleConstructorsCommand));
 
             Assert.True(options.GrouplessStartOptions.Count() == 0);
             Assert.True(options.StartOptionGroups.Count() == 3);
@@ -51,26 +53,30 @@ namespace StartOptions.Tests
         [Fact]
         public void TestConstructorNameConflicts()
         {
-            Assert.Throws<NameConflictException>(() => ReflectionHelper.GetStartOptions(typeof(GroupLongNameConflictCommand)));
-            Assert.Throws<NameConflictException>(() => ReflectionHelper.GetStartOptions(typeof(GroupLongShortNameConflictCommand)));
-            Assert.Throws<NameConflictException>(() => ReflectionHelper.GetStartOptions(typeof(OptionLongShortNameConflictCommand)));
-            Assert.Throws<NameConflictException>(() => ReflectionHelper.GetStartOptions(typeof(GrouplessOptionLongShortNameConflictCommand)));
-            Assert.Throws<NameConflictException>(() => ReflectionHelper.GetStartOptions(typeof(GroupShortNameConflictCommand)));
-            Assert.Throws<NameConflictException>(() => ReflectionHelper.GetStartOptions(typeof(OptionLongNameConflictCommand)));
-            Assert.Throws<NameConflictException>(() => ReflectionHelper.GetStartOptions(typeof(OptionShortNameConflictCommand)));
-            Assert.Throws<NameConflictException>(() => ReflectionHelper.GetStartOptions(typeof(GroupOptionLongNameConflictCommand)));
-            Assert.Throws<NameConflictException>(() => ReflectionHelper.GetStartOptions(typeof(GroupOptionShortNameConflictCommand)));
-            Assert.Throws<NameConflictException>(() => ReflectionHelper.GetStartOptions(typeof(GroupGrouplessOptionLongNameConflictCommand)));
-            Assert.Throws<NameConflictException>(() => ReflectionHelper.GetStartOptions(typeof(GroupGrouplessOptionShortNameConflictCommand)));
-            Assert.Throws<NameConflictException>(() => ReflectionHelper.GetStartOptions(typeof(OptionGrouplessOptionLongNameConflictCommand)));
-            Assert.Throws<NameConflictException>(() => ReflectionHelper.GetStartOptions(typeof(OptionGrouplessOptionShortNameConflictCommand)));
+            ReflectionHelper helper = this.GetDefaultReflectionHelper();
+
+            Assert.Throws<NameConflictException>(() => helper.GetStartOptions(typeof(GroupLongNameConflictCommand)));
+            Assert.Throws<NameConflictException>(() => helper.GetStartOptions(typeof(HelpOptionNameConflictCommand)));
+            Assert.Throws<NameConflictException>(() => helper.GetStartOptions(typeof(GroupShortNameConflictCommand)));
+            Assert.Throws<NameConflictException>(() => helper.GetStartOptions(typeof(OptionLongNameConflictCommand)));
+            Assert.Throws<NameConflictException>(() => helper.GetStartOptions(typeof(OptionShortNameConflictCommand)));
+            Assert.Throws<NameConflictException>(() => helper.GetStartOptions(typeof(GroupOptionLongNameConflictCommand)));
+            Assert.Throws<NameConflictException>(() => helper.GetStartOptions(typeof(GroupOptionShortNameConflictCommand)));
+            Assert.Throws<NameConflictException>(() => helper.GetStartOptions(typeof(GroupGrouplessOptionLongNameConflictCommand)));
+            Assert.Throws<NameConflictException>(() => helper.GetStartOptions(typeof(GroupGrouplessOptionShortNameConflictCommand)));
+            Assert.Throws<NameConflictException>(() => helper.GetStartOptions(typeof(OptionGrouplessOptionLongNameConflictCommand)));
+            Assert.Throws<NameConflictException>(() => helper.GetStartOptions(typeof(OptionGrouplessOptionShortNameConflictCommand)));
         }
 
         [Fact]
         public void TestMiscellaneousExceptions()
         {
-            Assert.Throws<NotSupportedException>(() => ReflectionHelper.GetStartOptions(typeof(UnrelatedConstructorParameterCommand)));
-            Assert.Throws<InvalidOperationException>(() => ReflectionHelper.GetStartOptions(typeof(AbstractParameterCommand)));
+            ReflectionHelper helper = this.GetDefaultReflectionHelper();
+
+            Assert.Throws<NotSupportedException>(() => helper.GetStartOptions(typeof(UnrelatedConstructorParameterCommand)));
+            Assert.Throws<NotSupportedException>(() => helper.GetStartOptions(typeof(GenericClassCommand<object>)));
+            Assert.Throws<InvalidOperationException>(() => helper.GetStartOptions(typeof(AbstractClassCommand)));
+            Assert.Throws<InvalidOperationException>(() => helper.GetStartOptions(typeof(NotACommandCommand)));
         }
 
         private void AssertStartOptionGroup(string longName, string shortName, string description, StartOptionGroup group)
@@ -87,6 +93,12 @@ namespace StartOptions.Tests
             Assert.Equal(description, option.Description);
             Assert.Equal(mandatory, option.IsRequired);
             Assert.Equal(valueType, option.ValueType);
+        }
+
+        private ReflectionHelper GetDefaultReflectionHelper()
+        {
+            IEnumerable<HelpOption> helpOptions = new HelpOption[] { new HelpOption("help", false), new HelpOption("h", true) };
+            return new ReflectionHelper(helpOptions, new StartOptionParserSettings());
         }
     }
 }
