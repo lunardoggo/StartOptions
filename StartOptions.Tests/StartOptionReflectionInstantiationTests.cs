@@ -1,16 +1,23 @@
-﻿using LunarDoggo.StartOptions;
-using LunarDoggo.StartOptions.Parsing;
+﻿using LunarDoggo.StartOptions.Parsing.Values;
+using LunarDoggo.StartOptions.Exceptions;
 using LunarDoggo.StartOptions.Reflection;
 using StartOptions.Tests.Mocks.Commands;
-using System;
+using LunarDoggo.StartOptions.Parsing;
 using System.Collections.Generic;
-using System.Text;
+using LunarDoggo.StartOptions;
+using System.Linq;
+using System;
 using Xunit;
 
 namespace StartOptions.Tests
 {
     public class StartOptionReflectionInstantiationTests
     {
+        static StartOptionReflectionInstantiationTests()
+        {
+            StartOptionValueParserRegistry.Register(new CalculationOperationValueParser());
+        }
+
         [Fact]
         public void TestInstantiateBasicCommand()
         {
@@ -32,31 +39,23 @@ namespace StartOptions.Tests
 
             Assert.Null(helper.Instantiate(parsedOptions));
 
-            helper = this.GetDefaultReflectionHelper(false);
-            parsedOptions = this.GetParsedStartOptions(helper, typeof(BasicMockCommand), new string[] { "-v" });
-
-            Assert.Throws<InvalidOperationException>(() => helper.Instantiate(parsedOptions));
+            helper = this.GetDefaultReflectionHelper(true);
+            Assert.Throws<OptionRequirementException>(() => this.GetParsedStartOptions(helper, typeof(BasicMockCommand), new string[] { "-v" }));
         }
 
         [Fact]
         public void TestInstantiateMultipleConstructor()
         {
             ReflectionHelper helper = this.GetDefaultReflectionHelper(false);
-            
-            ParsedStartOptions parsedOptions = this.GetParsedStartOptions(helper, typeof(BasicMockCommand), new string[] { "-l" });
+
+            ParsedStartOptions parsedOptions = this.GetParsedStartOptions(helper, typeof(MultipleConstructorsCommand), new string[] { "-l" });
             Assert.Throws<ListException>(() => helper.Instantiate(parsedOptions).Execute());
 
-            parsedOptions = this.GetParsedStartOptions(helper, typeof(BasicMockCommand), new string[] { "-a", "-v=s4" });
+            parsedOptions = this.GetParsedStartOptions(helper, typeof(MultipleConstructorsCommand), new string[] { "-a", "-v=s4" });
             Assert.Throws<AddException>(() => helper.Instantiate(parsedOptions).Execute());
 
-            parsedOptions = this.GetParsedStartOptions(helper, typeof(BasicMockCommand), new string[] { "-r", "-v=s3" });
+            parsedOptions = this.GetParsedStartOptions(helper, typeof(MultipleConstructorsCommand), new string[] { "-r", "-v=s3" });
             Assert.Throws<RemoveException>(() => helper.Instantiate(parsedOptions).Execute());
-
-            parsedOptions = this.GetParsedStartOptions(helper, typeof(BasicMockCommand), new string[] { "-r", "-v=s5" });
-            Assert.True(helper.Instantiate(parsedOptions).Execute());
-
-            parsedOptions = this.GetParsedStartOptions(helper, typeof(BasicMockCommand), new string[] { "-r", "-v=s5", "-i" });
-            Assert.True(helper.Instantiate(parsedOptions).Execute());
         }
 
         private Tuple<ReflectionHelper, ParsedStartOptions> GetHelperOptionsTuple(bool requireGroup, Type commandType, string[] args)
@@ -81,6 +80,23 @@ namespace StartOptions.Tests
             StartOptionParserSettings settings = new StartOptionParserSettings() { RequireStartOptionGroup = requireGroup };
 
             return new ReflectionHelper(helpOptions, settings);
+        }
+    }
+
+    internal class CalculationOperationValueParser : IStartOptionValueParser
+    {
+        public object ParseValue(string value)
+        {
+            if (Int32.TryParse(value, out int result))
+            {
+                return (CalculationOperation)result;
+            }
+            return Enum.GetValues(typeof(CalculationOperation)).Cast<CalculationOperation>().Single(_value => _value.ToString().Equals(value));
+        }
+
+        public object[] ParseValues(string[] values)
+        {
+            return values.Select(_value => this.ParseValue(_value)).ToArray();
         }
     }
 }

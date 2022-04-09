@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LunarDoggo.StartOptions.Parsing.Values;
+using System;
 
 namespace LunarDoggo.StartOptions
 {
@@ -14,6 +15,7 @@ namespace LunarDoggo.StartOptions
         public StartOptionValueType ValueType { get; set; } = StartOptionValueType.Switch;
         public string Description { get; set; } = String.Empty;
         public bool IsGrouplessOption { get; set; } = false;
+        public Type ParserType { get; set; } = null;
         public bool Mandatory { get; set; } = false;
 
         public string ShortName { get; }

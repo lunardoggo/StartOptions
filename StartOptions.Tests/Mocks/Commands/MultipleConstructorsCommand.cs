@@ -27,10 +27,7 @@ namespace StartOptions.Tests.Mocks.Commands
         {
             this.action = () =>
             {
-                if (!ignoreErrors || this.values.Contains(value))
-                {
-                    throw new RemoveException();
-                }
+                throw new RemoveException();
             };
         }
 
