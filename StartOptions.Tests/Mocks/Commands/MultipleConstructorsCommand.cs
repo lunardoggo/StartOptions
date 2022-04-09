@@ -12,13 +12,13 @@ namespace StartOptions.Tests.Mocks.Commands
         [StartOptionGroup("list", "l", Description = "Lists strings stored in the list")]
         public MultipleConstructorsCommand([StartOption("inLine", "i", Description = "Displays the items in a line instead of seperate lines")] bool inLine)
         {
-            this.action = () => Console.WriteLine($"Items: {(inLine ? "" : "\n")}{String.Join(inLine ? "," : "\n", this.values)}");
+            this.action = () => throw new ListException();
         }
 
         [StartOptionGroup("add", "a", Description = "Adds a new value to the stored list")]
         public MultipleConstructorsCommand([StartOption("value", "v", Description = "Value to be added", Mandatory = true, ValueType = StartOptionValueType.Single)] string value)
         {
-            this.action = () => this.values.Add(value);
+            this.action = () => throw new AddException();
         }
 
         [StartOptionGroup("remove", "r", Description = "Removes a value from the stored list")]
@@ -29,7 +29,7 @@ namespace StartOptions.Tests.Mocks.Commands
             {
                 if (!ignoreErrors || this.values.Contains(value))
                 {
-                    this.values.Remove(value);
+                    throw new RemoveException();
                 }
             };
         }
@@ -46,4 +46,11 @@ namespace StartOptions.Tests.Mocks.Commands
             return true;
         }
     }
+
+    internal class ListException : Exception
+    { }
+    internal class AddException : Exception
+    { }
+    internal class RemoveException : Exception
+    { }
 }

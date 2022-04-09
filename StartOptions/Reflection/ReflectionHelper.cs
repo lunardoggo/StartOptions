@@ -17,7 +17,7 @@ namespace LunarDoggo.StartOptions.Reflection
             this.settings = settings.Clone();
         }
 
-        public IApplicationCommand Instantiate(StartOptionGroup group, IEnumerable<StartOption> grouplessOptions)
+        public IApplicationCommand Instantiate(ParsedStartOptions parsedOptions)
         {
             throw new NotImplementedException();
         }

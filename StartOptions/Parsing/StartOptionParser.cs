@@ -29,7 +29,8 @@ namespace LunarDoggo.StartOptions.Parsing
         private readonly HelpOption[] helpOptions;
 
         public StartOptionParser(StartOptionParserSettings settings, IEnumerable<StartOptionGroup> groups,
-                                 IEnumerable<StartOption> grouplessOptions, IEnumerable<HelpOption> helpOptions)
+                                 IEnumerable<StartOption> grouplessOptions, IEnumerable<HelpOption> helpOptions,
+                                 bool validateNameConflics = true)
         {
             this.settings = settings.Clone();
 
@@ -38,7 +39,10 @@ namespace LunarDoggo.StartOptions.Parsing
             this.optionGroups = this.GetCopiedOptionGroups(groups);
             this.validator = this.GetValidator();
 
-            this.validator.CheckNameConflicts();
+            if (validateNameConflics)
+            {
+                this.validator.CheckNameConflicts();
+            }
         }
 
         private StartOptionParserValidator GetValidator()
