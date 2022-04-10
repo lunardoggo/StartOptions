@@ -19,9 +19,10 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon></PackageIcon>
     <FileVersion>1.0.0</FileVersion>
-	<VersionPrefix>1.1.0-pre1</VersionPrefix>
+	<VersionPrefix>1.1.0-preview.20220410</VersionPrefix>
+	<PackageVersion>1.1.0-preview.20220410</PackageVersion>
     <AssemblyVersion>1.1.0</AssemblyVersion>
-	<PackageReleaseNotes>Hotfix: StartOption and StartOptionGroup requirements are not ignored if the help page is requested by the user</PackageReleaseNotes>
+	<PackageReleaseNotes>Added start option parsing with attributes; note: the new parts of the library may contain undiscovered major bugs</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

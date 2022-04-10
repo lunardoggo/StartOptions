@@ -1,11 +1,7 @@
-﻿using LunarDoggo.StartOptions.Parsing.Values;
-using LunarDoggo.StartOptions.HelpPages;
-using LunarDoggo.StartOptions.Building;
+﻿using LunarDoggo.StartOptions.HelpPages;
 using LunarDoggo.StartOptions.Parsing;
 using System.Collections.Generic;
 using LunarDoggo.StartOptions;
-using System.Linq;
-using System.IO;
 using System;
 
 namespace StartOptions.Demo
