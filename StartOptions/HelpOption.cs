@@ -14,9 +14,19 @@ namespace LunarDoggo.StartOptions
             this.CheckNameValidity();
         }
 
+        /// <summary>
+        /// Gets whether the <see cref="HelpOption"/> name will use <see cref="StartOptionParserSettings.ShortOptionNamePrefix"/>
+        /// or <see cref="StartOptionParserSettings.LongOptionNamePrefix"/>
+        /// </summary>
         public bool IsShortName { get; }
+        /// <summary>
+        /// Gets the name of the <see cref="HelpOption"/>
+        /// </summary>
         public string Name { get; }
 
+        /// <summary>
+        /// Returns a copied instance of this <see cref="HelpOption"/> with the same values
+        /// </summary>
         public HelpOption Clone()
         {
             return new HelpOption(this.Name, this.IsShortName);

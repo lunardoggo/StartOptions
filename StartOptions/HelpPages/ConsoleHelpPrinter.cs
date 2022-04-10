@@ -15,6 +15,9 @@ namespace LunarDoggo.StartOptions.HelpPages
             this.indentationChar = indentationChar;
         }
 
+        /// <summary>
+        /// Prints the help page to the console according to the provided parameters
+        /// </summary>
         public void Print(StartOptionParserSettings settings, IEnumerable<HelpOption> helpOptions, IEnumerable<StartOptionGroup> groups, IEnumerable<StartOption> grouplessOptions)
         {
             StringBuilder builder = new StringBuilder();

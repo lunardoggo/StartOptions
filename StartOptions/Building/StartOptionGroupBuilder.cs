@@ -9,15 +9,24 @@ namespace LunarDoggo.StartOptions.Building
         private readonly List<StartOption> options = new List<StartOption>();
         private string description;
 
+        /// <summary>
+        /// Creates a new builder for a <see cref="StartOptionGroup"/> with the provided long and short name
+        /// </summary>
         public StartOptionGroupBuilder(string longName, string shortName) : base(longName, shortName)
         { }
 
+        /// <summary>
+        /// Sets the description of the <see cref="StartOptionGroup"/> displayed on the help page
+        /// </summary>
         public StartOptionGroupBuilder SetDescription(string description)
         {
             this.description = description;
             return this;
         }
 
+        /// <summary>
+        /// Adds a new <see cref="StartOption"/> to the <see cref="StartOptionGroup"/> with the provided long name, short name and builder
+        /// </summary>
         public StartOptionGroupBuilder AddOption(string longName, string shortName, Action<StartOptionBuilder> buildAction)
         {
             StartOptionBuilder builder = new StartOptionBuilder(longName, shortName);
@@ -25,6 +34,9 @@ namespace LunarDoggo.StartOptions.Building
             return this.AddOption(builder.Build());
         }
 
+        /// <summary>
+        /// Adds the provided <see cref="StartOption"/> to the <see cref="StartOptionGroup"/>
+        /// </summary>
         public StartOptionGroupBuilder AddOption(StartOption option)
         {
             this.CheckForNameDuplications(option);
@@ -32,6 +44,9 @@ namespace LunarDoggo.StartOptions.Building
             return this;
         }
 
+        /// <summary>
+        /// Returns a new instance of <see cref="StartOptionGroup"/> with all stored values
+        /// </summary>
         public override StartOptionGroup Build()
         {
             return new StartOptionGroup(this.longName, this.shortName, this.description, this.options);

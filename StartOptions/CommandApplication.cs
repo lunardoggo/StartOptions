@@ -29,16 +29,25 @@ namespace LunarDoggo.StartOptions
             command.Execute();
         }
 
+        /// <summary>
+        /// Returns the <see cref="StartOptionParserSettings"/> the application should use
+        /// </summary>
         protected virtual StartOptionParserSettings GetParserSettings()
         {
             return new StartOptionParserSettings();
         }
-
+        /// <summary>
+        /// Returns all <see cref="HelpOption"/>s supported by the application
+        /// </summary>
         protected virtual IEnumerable<HelpOption> GetHelpOptions()
         {
             return StartOptionParser.DefaultHelpOptions;
         }
-
+        /// <summary>
+        /// Returns types of commands the application supports. All types must implement
+        /// <see cref="IApplicationCommand"/>, must not be abstract and must contain at least one constructor
+        /// decorated with <see cref="StartOptionGroupAttribute"/>
+        /// </summary>
         protected abstract Type[] GetCommandTypes();
     }
 }

@@ -19,6 +19,10 @@ namespace LunarDoggo.StartOptions.Parsing.Values
             StartOptionValueParserRegistry.Register(new ByteOptionValueParser());
         }
 
+        /// <summary>
+        /// Registers the provided instance of <see cref="IStartOptionValueParser"/> for later use by instances of <see cref="StartOption"/>.
+        /// Every single <see cref="Type"/> implementing <see cref="IStartOptionValueParser"/> can only be registered once
+        /// </summary>
         public static void Register(IStartOptionValueParser parser)
         {
             if (parser != null)
@@ -27,6 +31,9 @@ namespace LunarDoggo.StartOptions.Parsing.Values
             }
         }
 
+        /// <summary>
+        /// Deregisters the provided <see cref="IStartOptionValueParser"/>, so it can't be used by instances od <see cref="StartOption"/> later
+        /// </summary>
         public static void Deregister(IStartOptionValueParser parser)
         {
             if (parser != null && StartOptionValueParserRegistry.parsers.ContainsKey(parser.GetType()))
@@ -35,6 +42,10 @@ namespace LunarDoggo.StartOptions.Parsing.Values
             }
         }
 
+        /// <summary>
+        /// Deregisters the provided <see cref="IStartOptionValueParser"/> of the provided <see cref="Type"/> <see cref="{T}"/>, so
+        /// it can't be used by instances od <see cref="StartOption"/> later
+        /// </summary>
         public static void Deregister<T>()
         {
             if (StartOptionValueParserRegistry.parsers.ContainsKey(typeof(T)))
@@ -43,6 +54,9 @@ namespace LunarDoggo.StartOptions.Parsing.Values
             }
         }
 
+        /// <summary>
+        /// Returns the registered instance <see cref="IStartOptionValueParser"/> of the provided <see cref="Type"/>
+        /// </summary>
         public static IStartOptionValueParser GetParser(Type key)
         {
             if (key != null && StartOptionValueParserRegistry.parsers.ContainsKey(key))
@@ -52,6 +66,9 @@ namespace LunarDoggo.StartOptions.Parsing.Values
             return null;
         }
 
+        /// <summary>
+        /// Returns the registered instance <see cref="IStartOptionValueParser"/> <see cref="Type"/> <see cref="{T}"/>
+        /// </summary>
         public static IStartOptionValueParser GetParser<T>()
         {
             return StartOptionValueParserRegistry.GetParser(typeof(T));
