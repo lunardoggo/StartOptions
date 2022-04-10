@@ -10,7 +10,7 @@ namespace StartOptions.Tests.Mocks.Commands
         public UnrelatedConstructorParameterCommand([StartOption("option", "o")]string option, int i) 
         { }
 
-        public bool Execute()
+        public void Execute()
         {
             throw new NotImplementedException();
         }
@@ -23,7 +23,7 @@ namespace StartOptions.Tests.Mocks.Commands
         public NotACommandCommand([StartOption("option", "o")] string option)
         { }
 
-        public bool Execute()
+        public void Execute()
         {
             throw new NotImplementedException();
         }
@@ -36,7 +36,7 @@ namespace StartOptions.Tests.Mocks.Commands
         public AbstractClassCommand([StartOption("option", "o")]string option)
         { }
 
-        public bool Execute()
+        public void Execute()
         {
             throw new NotImplementedException();
         }
@@ -49,7 +49,7 @@ namespace StartOptions.Tests.Mocks.Commands
         public GenericClassCommand([StartOption("option", "o")] T option)
         { }
 
-        public bool Execute()
+        public void Execute()
         {
             throw new NotImplementedException();
         }
@@ -66,7 +66,7 @@ namespace StartOptions.Tests.Mocks.Commands
         public GroupLongNameConflictCommand()
         { }
 
-        public bool Execute()
+        public void Execute()
         {
             throw new NotImplementedException();
         }
@@ -83,7 +83,7 @@ namespace StartOptions.Tests.Mocks.Commands
         public GroupShortNameConflictCommand()
         { }
 
-        public bool Execute()
+        public void Execute()
         {
             throw new NotImplementedException();
         }
@@ -97,7 +97,7 @@ namespace StartOptions.Tests.Mocks.Commands
                                               [StartOption("option", "op")] string option2)
         { }
 
-        public bool Execute()
+        public void Execute()
         {
             throw new NotImplementedException();
         }
@@ -111,7 +111,7 @@ namespace StartOptions.Tests.Mocks.Commands
                                               [StartOption("option2", "o")] string option2)
         { }
 
-        public bool Execute()
+        public void Execute()
         {
             throw new NotImplementedException();
         }
@@ -124,7 +124,7 @@ namespace StartOptions.Tests.Mocks.Commands
         public GroupOptionLongNameConflictCommand([StartOption("group", "o")] string option)
         { }
 
-        public bool Execute()
+        public void Execute()
         {
             throw new NotImplementedException();
         }
@@ -137,7 +137,7 @@ namespace StartOptions.Tests.Mocks.Commands
         public GroupOptionShortNameConflictCommand([StartOption("option", "g")] string option)
         { }
 
-        public bool Execute()
+        public void Execute()
         {
             throw new NotImplementedException();
         }
@@ -150,7 +150,7 @@ namespace StartOptions.Tests.Mocks.Commands
         public GroupGrouplessOptionLongNameConflictCommand([StartOption("group", "o", IsGrouplessOption = true)] string option)
         { }
 
-        public bool Execute()
+        public void Execute()
         {
             throw new NotImplementedException();
         }
@@ -163,7 +163,7 @@ namespace StartOptions.Tests.Mocks.Commands
         public GroupGrouplessOptionShortNameConflictCommand([StartOption("group", "o", IsGrouplessOption = true)] string option)
         { }
 
-        public bool Execute()
+        public void Execute()
         {
             throw new NotImplementedException();
         }
@@ -177,7 +177,7 @@ namespace StartOptions.Tests.Mocks.Commands
                                                             [StartOption("option", "o2", IsGrouplessOption = true)] string option2)
         { }
 
-        public bool Execute()
+        public void Execute()
         {
             throw new NotImplementedException();
         }
@@ -191,7 +191,7 @@ namespace StartOptions.Tests.Mocks.Commands
                                                              [StartOption("option2", "o", IsGrouplessOption = true)] string option2)
         { }
 
-        public bool Execute()
+        public void Execute()
         {
             throw new NotImplementedException();
         }
@@ -204,7 +204,7 @@ namespace StartOptions.Tests.Mocks.Commands
         public HelpOptionNameConflictCommand([StartOption("help", "o")] string option)
         { }
 
-        public bool Execute()
+        public void Execute()
         {
             throw new NotImplementedException();
         }

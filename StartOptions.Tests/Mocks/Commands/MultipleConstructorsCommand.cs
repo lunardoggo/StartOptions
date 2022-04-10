@@ -6,11 +6,11 @@ namespace StartOptions.Tests.Mocks.Commands
 {
     public class MultipleConstructorsCommand : IApplicationCommand
     {
-        private readonly List<string> values = new List<string>() { "s1", "s2", "s3" };
         private readonly Action action;
 
         [StartOptionGroup("list", "l", Description = "Lists strings stored in the list")]
-        public MultipleConstructorsCommand([StartOption("inLine", "i", Description = "Displays the items in a line instead of seperate lines")] bool inLine)
+        public MultipleConstructorsCommand([StartOption("inLine", "i", Description = "Displays the items in a line instead of seperate lines")] bool inLine,
+                                           [StartOption("verbose", "vb", Description = "Enable verbose output", IsGrouplessOption = true)] bool verbose)
         {
             this.action = () => throw new ListException();
         }
@@ -37,10 +37,9 @@ namespace StartOptions.Tests.Mocks.Commands
             this.action = () => Console.WriteLine("obj: {0}", input);
         }
 
-        public bool Execute()
+        public void Execute()
         {
             this.action.Invoke();
-            return true;
         }
     }
 

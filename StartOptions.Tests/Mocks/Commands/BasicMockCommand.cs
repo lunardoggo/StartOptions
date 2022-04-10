@@ -14,7 +14,7 @@ namespace StartOptions.Tests.Mocks.Commands
         public BasicMockCommand([StartOption("number1", "n1", Description = "First number of the calculation", Mandatory = true, ValueType = StartOptionValueType.Single, ParserType = typeof(DoubleOptionValueParser))]double firstNumber,
                                 [StartOption("number2", "n2", Description = "Second number of the calculation", Mandatory = true, ValueType = StartOptionValueType.Single, ParserType = typeof(DoubleOptionValueParser))]double secondNumber,
                                 [StartOption("operation", "o", Description = "Operation to execute", Mandatory = true, ValueType = StartOptionValueType.Single, ParserType = typeof(CalculationOperationValueParser))] CalculationOperation operation,
-                                [StartOption("verbose", "v", Description = "Enable verbose output", IsGrouplessOption = true)]bool verbose)
+                                [StartOption("verbose", "vb", Description = "Enable verbose output", IsGrouplessOption = true)]bool verbose)
         {
             this.secondNumber = secondNumber;
             this.firstNumber = firstNumber;
@@ -22,7 +22,7 @@ namespace StartOptions.Tests.Mocks.Commands
             this.verbose = verbose;
         }
 
-        public bool Execute()
+        public void Execute()
         {
             switch(this.operation)
             {
@@ -39,7 +39,6 @@ namespace StartOptions.Tests.Mocks.Commands
                     Console.WriteLine("{0} + {1} = {2}; verbose output: {3}", this.firstNumber, this.secondNumber, this.firstNumber + this.secondNumber, this.verbose);
                     break;
             }
-            return true;
         }
     }
 

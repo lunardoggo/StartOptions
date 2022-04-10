@@ -1,5 +1,6 @@
 ﻿using LunarDoggo.StartOptions.Parsing.Values;
 using LunarDoggo.StartOptions.Interfaces;
+using System;
 
 namespace LunarDoggo.StartOptions
 {
@@ -17,6 +18,8 @@ namespace LunarDoggo.StartOptions
             this.ShortName = shortName;
             this.LongName = longName;
         }
+
+        internal Type ParserType { get { return this.valueParser?.GetType(); } }
 
         public StartOptionValueType ValueType { get; }
         public string Description { get; }

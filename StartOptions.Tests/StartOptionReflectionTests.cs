@@ -13,6 +13,15 @@ namespace StartOptions.Tests
     public class StartOptionReflectionTests
     {
         [Fact]
+        public void TestGetFromMultipleCommands()
+        {
+            ApplicationStartOptions options = this.GetDefaultReflectionHelper().GetStartOptions(typeof(BasicMockCommand), typeof(MultipleConstructorsCommand));
+
+            Assert.Equal(4, options.StartOptionGroups.Count());
+            Assert.Single(options.GrouplessStartOptions);
+        }
+
+        [Fact]
         public void TestGetStartOptions()
         {
             ApplicationStartOptions options = this.GetDefaultReflectionHelper().GetStartOptions(typeof(BasicMockCommand));
@@ -25,7 +34,7 @@ namespace StartOptions.Tests
             this.AssertStartOption("operation", "o", "Operation to execute", true, StartOptionValueType.Single, group.GetOptionByShortName("o"));
 
             Assert.True(options.GrouplessStartOptions.Count() == 1);
-            this.AssertStartOption("verbose", "v", "Enable verbose output", false, StartOptionValueType.Switch, options.GrouplessStartOptions.Single());
+            this.AssertStartOption("verbose", "vb", "Enable verbose output", false, StartOptionValueType.Switch, options.GrouplessStartOptions.Single());
         }
 
         [Fact]
@@ -33,7 +42,7 @@ namespace StartOptions.Tests
         {
             ApplicationStartOptions options = this.GetDefaultReflectionHelper().GetStartOptions(typeof(MultipleConstructorsCommand));
 
-            Assert.True(options.GrouplessStartOptions.Count() == 0);
+            Assert.True(options.GrouplessStartOptions.Count() == 1);
             Assert.True(options.StartOptionGroups.Count() == 3);
 
             StartOptionGroup list = options.StartOptionGroups.Single(_grp => _grp.LongName.Equals("list"));

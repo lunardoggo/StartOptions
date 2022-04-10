@@ -28,19 +28,19 @@ namespace StartOptions.Tests
             IApplicationCommand command = helper.Instantiate(parsedOptions);
             Assert.NotNull(command);
             Assert.IsType<BasicMockCommand>(command);
-            Assert.True(command.Execute());
+            command.Execute();
         }
 
         [Fact]
         public void TestInstantiateWithoutGroup()
         {
             ReflectionHelper helper = this.GetDefaultReflectionHelper(false);
-            ParsedStartOptions parsedOptions = this.GetParsedStartOptions(helper, typeof(BasicMockCommand), new string[] { "-v" });
+            ParsedStartOptions parsedOptions = this.GetParsedStartOptions(helper, typeof(BasicMockCommand), new string[] { "-vb" });
 
             Assert.Null(helper.Instantiate(parsedOptions));
 
             helper = this.GetDefaultReflectionHelper(true);
-            Assert.Throws<OptionRequirementException>(() => this.GetParsedStartOptions(helper, typeof(BasicMockCommand), new string[] { "-v" }));
+            Assert.Throws<OptionRequirementException>(() => this.GetParsedStartOptions(helper, typeof(BasicMockCommand), new string[] { "-vb" }));
         }
 
         [Fact]

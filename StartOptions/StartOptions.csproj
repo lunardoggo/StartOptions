@@ -19,13 +19,13 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon></PackageIcon>
     <FileVersion>1.0.0</FileVersion>
-	<VersionPrefix>1.0.2</VersionPrefix>
-    <AssemblyVersion>1.0.2</AssemblyVersion>
+	<VersionPrefix>1.1.0-pre1</VersionPrefix>
+    <AssemblyVersion>1.1.0</AssemblyVersion>
 	<PackageReleaseNotes>Hotfix: StartOption and StartOptionGroup requirements are not ignored if the help page is requested by the user</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Collections.Immutable" Version="1.7.1" />
+    <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>

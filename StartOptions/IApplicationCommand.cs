@@ -2,6 +2,6 @@
 {
     public interface IApplicationCommand
     {
-        bool Execute();
+        void Execute();
     }
 }

@@ -5,7 +5,7 @@ namespace LunarDoggo.StartOptions
 {
     public abstract class AbstractApplication
     {
-        private readonly ApplicationStartOptions options;
+        internal readonly ApplicationStartOptions options;
 
         public AbstractApplication()
         {

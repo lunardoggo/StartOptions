@@ -1,10 +1,10 @@
-﻿using LunarDoggo.StartOptions.Exceptions;
+﻿using LunarDoggo.StartOptions.Parsing.Values;
+using LunarDoggo.StartOptions.Exceptions;
 using LunarDoggo.StartOptions.Parsing;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
 using System;
-using LunarDoggo.StartOptions.Parsing.Values;
 
 namespace LunarDoggo.StartOptions.Reflection
 {
@@ -26,7 +26,7 @@ namespace LunarDoggo.StartOptions.Reflection
             {
                 return constructor.Invoke(this.GetConstructorParameters(constructor.GetParameters(), parsedOptions)) as IApplicationCommand;
             }
-            else if(this.settings.RequireStartOptionGroup)
+            else if (this.settings.RequireStartOptionGroup)
             {
                 throw new OptionRequirementException("At least one StartOptionGroup must be selected");
             }
@@ -38,14 +38,14 @@ namespace LunarDoggo.StartOptions.Reflection
             StartOption[] allOptions = options.ParsedOptionGroup.Options.Concat(options.ParsedGrouplessOptions).ToArray();
             List<object> values = new List<object>();
 
-            foreach(ParameterInfo parameter in parameters)
+            foreach (ParameterInfo parameter in parameters)
             {
                 StartOptionAttribute attribute = parameter.GetCustomAttribute<StartOptionAttribute>();
                 StartOption option = allOptions.SingleOrDefault(_option => _option.LongName.Equals(attribute.LongName));
 
                 if (option != null)
                 {
-                    switch(option.ValueType)
+                    switch (option.ValueType)
                     {
                         case StartOptionValueType.Switch:
                             values.Add(true);
@@ -56,7 +56,7 @@ namespace LunarDoggo.StartOptions.Reflection
                             break;
                     }
                 }
-                else if(attribute.ValueType == StartOptionValueType.Switch)
+                else if (attribute.ValueType == StartOptionValueType.Switch)
                 {
                     values.Add(false);
                 }
@@ -69,21 +69,23 @@ namespace LunarDoggo.StartOptions.Reflection
             return values.ToArray();
         }
 
-        public ApplicationStartOptions GetStartOptions(Type type)
+        public ApplicationStartOptions GetStartOptions(params Type[] types)
         {
-            TypeInfo typeInfo = type.GetTypeInfo();
-            if (!typeof(IApplicationCommand).GetTypeInfo().IsAssignableFrom(typeInfo))
+            List<StartOptionGroupsParameter> parameters = new List<StartOptionGroupsParameter>();
+            foreach (Type type in types)
             {
-                throw new InvalidOperationException("The type has to inherit from IApplicationCommand.", this.GetTypeInQuestionException(type));
+                parameters.Add(this.GetStartOptions(type, type.GetTypeInfo()));
             }
-            if (typeInfo.IsAbstract)
-            {
-                throw new InvalidOperationException("The type must not be abstract.", this.GetTypeInQuestionException(type));
-            }
-            if (typeInfo.IsGenericType)
-            {
-                throw new NotSupportedException("The type must not be generic.", this.GetTypeInQuestionException(type));
-            }
+            ApplicationStartOptions options = new ApplicationStartOptions(parameters.Select(_param => _param.Groups).SelectMany(_grp => _grp).ToArray(),
+                                                                          parameters.Select(_param => _param.GrouplessOptions).SelectMany(_opt => _opt).Distinct(StartOptionComparer.Instance).ToArray(),
+                                                                          this.helpOptions, this.settings);
+            this.ValidateStartOptionNames(options.StartOptionGroups, options.GrouplessStartOptions);
+            return options;
+        }
+
+        private StartOptionGroupsParameter GetStartOptions(Type type, TypeInfo typeInfo)
+        {
+            this.ValidateTypeInfo(type, typeInfo);
 
             ConstructorInfo[] constructors = typeInfo.DeclaredConstructors.Where(_constructor => _constructor.GetCustomAttribute<StartOptionGroupAttribute>(true) != null && _constructor.IsPublic && !_constructor.IsStatic).ToArray();
 
@@ -106,10 +108,29 @@ namespace LunarDoggo.StartOptions.Reflection
                 }
             }
 
-            StartOptionParserValidator validator = new StartOptionParserValidator(this.settings, groups, grouplessOptions, this.helpOptions);
-            validator.CheckNameConflicts();
+            return new StartOptionGroupsParameter(groups, grouplessOptions);
+        }
 
-            return new ApplicationStartOptions(groups.ToArray(), grouplessOptions.ToArray(), this.helpOptions, this.settings);
+        private void ValidateTypeInfo(Type type, TypeInfo typeInfo)
+        {
+            if (!typeof(IApplicationCommand).GetTypeInfo().IsAssignableFrom(typeInfo))
+            {
+                throw new InvalidOperationException("The type has to inherit from IApplicationCommand.", this.GetTypeInQuestionException(type));
+            }
+            if (typeInfo.IsAbstract)
+            {
+                throw new InvalidOperationException("The type must not be abstract.", this.GetTypeInQuestionException(type));
+            }
+            if (typeInfo.IsGenericType)
+            {
+                throw new NotSupportedException("The type must not be generic.", this.GetTypeInQuestionException(type));
+            }
+        }
+
+        private void ValidateStartOptionNames(IEnumerable<StartOptionGroup> groups, IEnumerable<StartOption> options)
+        {
+            StartOptionParserValidator validator = new StartOptionParserValidator(this.settings, groups, options, this.helpOptions);
+            validator.CheckNameConflicts();
         }
 
         private StartOptionGroupParameter? GetStartOptionGroup(Type type, ConstructorInfo constructor)
@@ -181,6 +202,52 @@ namespace LunarDoggo.StartOptions.Reflection
 
             public List<StartOption> GrouplessOptions { get; set; }
             public StartOptionGroup Group { get; set; }
+        }
+
+        private struct StartOptionGroupsParameter
+        {
+            public StartOptionGroupsParameter(IEnumerable<StartOptionGroup> groups, IEnumerable<StartOption> grouplessOptions)
+            {
+                this.GrouplessOptions = grouplessOptions;
+                this.Groups = groups;
+            }
+
+            public IEnumerable<StartOption> GrouplessOptions { get; set; }
+            public IEnumerable<StartOptionGroup> Groups { get; set; }
+        }
+
+        private class StartOptionComparer : IEqualityComparer<StartOption>
+        {
+            public static StartOptionComparer Instance { get; }
+            static StartOptionComparer()
+            {
+                StartOptionComparer.Instance = new StartOptionComparer();
+            }
+
+            public bool Equals(StartOption x, StartOption y)
+            {
+                return x == null && y == null ||
+                       x.IsRequired == y.IsRequired
+                    && x.LongName.Equals(y.LongName)
+                    && x.ShortName.Equals(y.ShortName)
+                    && x.Description.Equals(y.Description)
+                    && x.ValueType == y.ValueType
+                    && (x.ParserType == null && y.ParserType == null || x.ParserType == y.ParserType);
+            }
+
+            public int GetHashCode(StartOption option)
+            {
+                if (option == null)
+                {
+                    return 0;
+                }
+
+                unchecked
+                {
+                    return option.LongName.GetHashCode() * option.ShortName.GetHashCode() * option.Description.GetHashCode()
+                         * option.IsRequired.GetHashCode() * option.ValueType.GetHashCode() * (option.ParserType?.FullName ?? String.Empty).GetHashCode();
+                }
+            }
         }
     }
 }
