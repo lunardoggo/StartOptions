@@ -19,8 +19,8 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon></PackageIcon>
     <FileVersion>1.0.0</FileVersion>
-	<VersionPrefix>1.1.0-preview.20220410</VersionPrefix>
-	<PackageVersion>1.1.0-preview.20220410</PackageVersion>
+	<VersionPrefix>1.1.0-preview.20220411</VersionPrefix>
+	<PackageVersion>1.1.0-preview.20220411</PackageVersion>
     <AssemblyVersion>1.1.0</AssemblyVersion>
 	<PackageReleaseNotes>Added start option parsing with attributes; note: the new parts of the library may contain undiscovered major bugs</PackageReleaseNotes>
   </PropertyGroup>

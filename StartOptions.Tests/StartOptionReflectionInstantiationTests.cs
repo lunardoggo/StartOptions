@@ -32,6 +32,36 @@ namespace StartOptions.Tests
         }
 
         [Fact]
+        public void TestInstantiateUnsetOptions()
+        {
+            this.AssertNullValuesCommand(null, 0, 0, false, false, new[] { "-g", "-s" });
+            this.AssertNullValuesCommand(null, 0, 0, false, false, new[] { "-g" });
+            this.AssertNullValuesCommand("abc", 0, 0, false, false, new[] { "-g", "-s=abc" });
+            this.AssertNullValuesCommand(null, 0, 0, true, true, new[] { "-g", "-sw", "-bo=true" });
+            this.AssertNullValuesCommand(null, 4, 6, false, false, new[] { "-g", "-i=4", "-by=6" });
+            this.AssertNullValuesCommand("abc", 15, 110, false, true, new[] { "-g", "-s=abc", "-sw", "-bo=false", "-i=15", "-by=110" });
+            this.AssertNullValuesCommand(null, 0, 0, false, true, new[] { "-g", "-s", "-sw", "-bo", "-i", "-by" });
+        }
+
+        private void AssertNullValuesCommand(string stringValue, int intValue, byte byteValue, bool boolValue, bool switchValue, string[] args)
+        {
+            Tuple<ReflectionHelper, ParsedStartOptions> tuple = this.GetHelperOptionsTuple(true, typeof(NullValuesCommand), args);
+            ParsedStartOptions parsedOptions = tuple.Item2;
+            ReflectionHelper helper = tuple.Item1;
+
+            IApplicationCommand command = helper.Instantiate(parsedOptions);
+            Assert.NotNull(command);
+            Assert.IsType<NullValuesCommand>(command);
+            NullValuesCommand nullCommand = command as NullValuesCommand;
+
+            Assert.Equal(intValue, nullCommand.IntValue);
+            Assert.Equal(boolValue, nullCommand.BoolValue);
+            Assert.Equal(byteValue, nullCommand.ByteValue);
+            Assert.Equal(stringValue, nullCommand.StringValue);
+            Assert.Equal(switchValue, nullCommand.SwitchValue);
+        }
+
+        [Fact]
         public void TestInstantiateWithoutGroup()
         {
             ReflectionHelper helper = this.GetDefaultReflectionHelper(false);

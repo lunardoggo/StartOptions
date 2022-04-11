@@ -62,10 +62,9 @@ namespace LunarDoggo.StartOptions.Reflection
                 }
                 else
                 {
-                    values.Add(parameter.ParameterType.IsByRef ? null : parameter.DefaultValue);
+                    values.Add(parameter.ParameterType.GetTypeInfo().IsValueType ? Activator.CreateInstance(parameter.ParameterType) : null);
                 }
             }
-
             return values.ToArray();
         }
 
