@@ -1,9 +1,11 @@
-﻿using System;
+﻿using System.Collections.Generic;
+using System;
 
 namespace LunarDoggo.StartOptions.DependencyInjection
 {
     public class SimpleDependencyProvider : IDependencyProvider
     {
+        private readonly Dictionary<Type, object> dependencies = new Dictionary<Type, object>();
         private readonly bool throwIfNotFound;
 
         public SimpleDependencyProvider(bool throwExceptionIfDependencyNotFound)
@@ -11,19 +13,29 @@ namespace LunarDoggo.StartOptions.DependencyInjection
             this.throwIfNotFound = throwExceptionIfDependencyNotFound;
         }
 
-        public void AddSingleton(object value)
+        public void AddSingleton<T>(T value)
         {
-            throw new NotImplementedException();
-        }
-
-        public void AddSingleton<T, U>(U value) where U : T
-        {
-            throw new NotImplementedException();
+            if(value == null)
+            {
+                throw new ArgumentNullException("Can't register \"null\" as a dependency");
+            }
+            if(this.dependencies.ContainsKey(typeof(T)))
+            {
+                throw new ArgumentException($"Can't register dependency of type \"{typeof(T).FullName}\" twice");
+            }
+            this.dependencies.Add(typeof(T), value);
         }
 
         public T GetDependency<T>()
         {
-            throw new NotImplementedException();
+            if(this.dependencies.ContainsKey(typeof(T)))
+            {
+                return (T)this.dependencies[typeof(T)];
+            }
+            else
+            {
+                throw new KeyNotFoundException($"Dependency of type \"{typeof(T).FullName}\" couldn't be resolved");
+            }
         }
     }
 }

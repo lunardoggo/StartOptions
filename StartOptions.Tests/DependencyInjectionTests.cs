@@ -14,9 +14,11 @@ namespace StartOptions.Tests
         public void TestGetServicesExceptions()
         {
             SimpleDependencyProvider provider = new SimpleDependencyProvider(true);
-            
             Assert.Throws<KeyNotFoundException>(() => provider.GetDependency<string>());
-            Assert.Throws<ArgumentException>(() => provider.AddSingleton(null));
+            Assert.Throws<ArgumentNullException>(() => provider.AddSingleton<object>(null));
+
+            provider.AddSingleton("value");
+            Assert.Throws<ArgumentException>(() => provider.AddSingleton("abc"));
         }
 
         [Fact]
@@ -32,13 +34,13 @@ namespace StartOptions.Tests
             Assert.Equal("value", value);
 
             Assert.NotNull(database);
-            Assert.Equal(2, database.GetUsers().Count());
+            Assert.Equal(3, database.GetUsers().Count());
         }
 
         private IDependencyProvider GetDependencyProvider()
         {
             SimpleDependencyProvider provider = new SimpleDependencyProvider(false);
-            provider.AddSingleton<IDatabase, MockDatabase>(new MockDatabase());
+            provider.AddSingleton<IDatabase>(new MockDatabase());
             provider.AddSingleton(IPAddress.Loopback);
             provider.AddSingleton("value");
             return provider;
