@@ -28,13 +28,18 @@ namespace LunarDoggo.StartOptions.DependencyInjection
 
         public T GetDependency<T>()
         {
-            if(this.dependencies.ContainsKey(typeof(T)))
+            return (T)this.GetDependency(typeof(T));
+        }
+
+        public object GetDependency(Type type)
+        {
+            if (this.dependencies.ContainsKey(type))
             {
-                return (T)this.dependencies[typeof(T)];
+                return this.dependencies[type];
             }
             else
             {
-                throw new KeyNotFoundException($"Dependency of type \"{typeof(T).FullName}\" couldn't be resolved");
+                throw new KeyNotFoundException($"Dependency of type \"{type.FullName}\" couldn't be resolved");
             }
         }
     }

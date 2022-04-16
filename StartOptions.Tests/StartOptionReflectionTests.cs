@@ -82,7 +82,7 @@ namespace StartOptions.Tests
         {
             ReflectionHelper helper = this.GetDefaultReflectionHelper();
 
-            Assert.Throws<NotSupportedException>(() => helper.GetStartOptions(typeof(UnrelatedConstructorParameterCommand)));
+            Assert.Throws<InvalidOperationException>(() => helper.GetStartOptions(typeof(UnrelatedConstructorParameterCommand)));
             Assert.Throws<NotSupportedException>(() => helper.GetStartOptions(typeof(GenericClassCommand<object>)));
             Assert.Throws<InvalidOperationException>(() => helper.GetStartOptions(typeof(AbstractClassCommand)));
             Assert.Throws<InvalidOperationException>(() => helper.GetStartOptions(typeof(NotACommandCommand)));
@@ -107,7 +107,7 @@ namespace StartOptions.Tests
         private ReflectionHelper GetDefaultReflectionHelper()
         {
             IEnumerable<HelpOption> helpOptions = new HelpOption[] { new HelpOption("help", false), new HelpOption("h", true) };
-            return new ReflectionHelper(helpOptions, new StartOptionParserSettings());
+            return new ReflectionHelper(helpOptions, new StartOptionParserSettings(), null);
         }
     }
 }

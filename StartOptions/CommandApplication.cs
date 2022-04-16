@@ -1,4 +1,5 @@
-﻿using LunarDoggo.StartOptions.Reflection;
+﻿using LunarDoggo.StartOptions.DependencyInjection;
+using LunarDoggo.StartOptions.Reflection;
 using LunarDoggo.StartOptions.Parsing;
 using System.Collections.Generic;
 using System;
@@ -14,7 +15,7 @@ namespace LunarDoggo.StartOptions
             StartOptionParserSettings settings = this.GetParserSettings();
             IEnumerable<HelpOption> helpOptions = this.GetHelpOptions();
             Type[] commandTypes = this.GetCommandTypes();
-            this.helper = new ReflectionHelper(helpOptions, settings);
+            this.helper = new ReflectionHelper(helpOptions, settings, this.GetDependencyProvider());
             return this.helper.GetStartOptions(commandTypes);
         }
 
@@ -39,6 +40,7 @@ namespace LunarDoggo.StartOptions
             return StartOptionParser.DefaultHelpOptions;
         }
 
+        protected abstract IDependencyProvider GetDependencyProvider();
         protected abstract Type[] GetCommandTypes();
     }
 }

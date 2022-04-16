@@ -1,4 +1,5 @@
-﻿using LunarDoggo.StartOptions.HelpPages;
+﻿using LunarDoggo.StartOptions.DependencyInjection;
+using LunarDoggo.StartOptions.HelpPages;
 using LunarDoggo.StartOptions.Parsing;
 using System.Collections.Generic;
 using LunarDoggo.StartOptions;
@@ -40,6 +41,11 @@ namespace StartOptions.Demo
                 LongOptionNamePrefix = "/",
                 OptionValueSeparator = ' ',
             };
+        }
+
+        protected override IDependencyProvider GetDependencyProvider()
+        {
+            return null;
         }
 
         protected override Type[] GetCommandTypes()

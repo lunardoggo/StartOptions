@@ -3,11 +3,11 @@ using System;
 
 namespace StartOptions.Tests.Mocks.Commands
 {
-    //Should throw a NotSupportedException
+    //Should throw a InvalidOperationException due to unrelated parameter that can't be resolved by the ReflectionHelper's dependency resolver
     public class UnrelatedConstructorParameterCommand : IApplicationCommand
     {
         [StartOptionGroup("group", "g")]
-        public UnrelatedConstructorParameterCommand([StartOption("option", "o")]string option, int i) 
+        public UnrelatedConstructorParameterCommand([StartOption("option", "o", ValueType = StartOptionValueType.Single)]string option, int i) 
         { }
 
         public void Execute()

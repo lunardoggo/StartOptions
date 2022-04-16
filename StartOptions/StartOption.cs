@@ -6,7 +6,7 @@ namespace LunarDoggo.StartOptions
     public class StartOption : IClonable<StartOption>
     {
         private readonly IStartOptionValueParser valueParser;
-        private object value;
+        protected object value;
 
         internal StartOption(string longName, string shortName, string description, IStartOptionValueParser valueParser, StartOptionValueType valueType, bool required)
         {
