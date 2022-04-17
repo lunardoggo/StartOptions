@@ -32,12 +32,18 @@ protected abstract Type[] GetCommandTypes();
 ---
 
 # Getting started
-This library provides two ways for you to let you customize your application's command line arguments:
-  * by utilizing Attributes
-  * by builsing the StartOptions yourself
+The first step to using this library is to install the lates version of the [nuget package](https://www.nuget.org/packages/LunarDoggo.StartOptions/) for your project,
+for example by using the package manager console in Visual Studio:
+```powershell
+Install-Package LunarDoggo.StartOptions [-ProjectName <your project name>]
+```
+
+This library provides two distinct ways for customizing your application's command line arguments:
+  * by utilizing attributes
+  * by building the StartOptions yourself
 
 ### 1. Using the attribute-based approach
-If you chose the attribute-based approach, first create some classes that implement the interface `IApplicationCommand`, make sure to define at least one constructor per class that is decorated with the [StartOptionGroupAttribute](https://github.com/lunardoggo/StartOptions/wiki/StartOptionGroupAttribute) and only contains parameters that are decorated with the [StartOptionAttribute](https://github.com/lunardoggo/StartOptions/wiki/StartOptionAttribute). The method `Execute()` contains the code that will run the command:
+If you chose the attribute-based approach, first create some classes that implement the interface `IApplicationCommand`, make sure to define at least one constructor per class that is decorated with the [StartOptionGroupAttribute](https://github.com/lunardoggo/StartOptions/wiki/StartOptionGroupAttribute) and contains parameters that are decorated with the [StartOptionAttribute](https://github.com/lunardoggo/StartOptions/wiki/StartOptionAttribute). If you want to add constructor parameters that aren't decorated with a StartOptionAttribute, you have to provide an [IDependencyProvider](https://github.com/lunardoggo/StartOptions/wiki/DependencyProvider). The method `Execute()` contains the code that will run the command:
 ```csharp
 public class AddCommand : IApplicationCommand
 {
@@ -68,7 +74,18 @@ protected override Type[] GetCommandTypes()
     return new[] { typeof(AddCommand), typeof(ReadFileCommand) };
 }
 ```
-And implement the method that will print the help page of your application:
+Set the [IDependencyProvider](https://github.com/lunardoggo/StartOptions/wiki/DependencyProvider) to be used to resolve constructor parameters that aren't decorated with a StartOptionAttribute. If you don't want to use this feature, simply return `null`. The library is shipped with the [SimpleDependencyProvider](https://github.com/lunardoggo/StartOptions/wiki/DependencyProvider), you can also use dependency injection frameworks, like Ninject, but you'll have to implement a proxy class implementing `IDependencyProvider` to allow access to the dependency framework. This example will use the SimpleDependencyProvider:
+```csharp
+protected override IDependencyProvider GetDependencyProvider()
+{
+    //true: throw an exception if a dependency can't be resolved
+    SimpleDependencyProvider provider = new SimpleDependencyProvider(true);
+    //Add dependencies to the cache like so, keep in mind that every Type can only be registered once:
+    provider.AddSingleton<IDatabase>(new MySqlDatabase("connection string here"));
+    return provider;
+}
+```
+And finally implement the method that will print the help page of your application, you can implement a custom help page printing mechanism or simply use the included class [ConsoleHelpPrinter](https://github.com/lunardoggo/StartOptions/wiki/IHelpPagePrinter):
 ```csharp
 protected override void PrintHelpPage(StartOptionParserSettings settings, IEnumerable<HelpOption> helpOptions, IEnumerable<StartOptionGroup> groups, IEnumerable<StartOption> grouplessOptions)
 {
