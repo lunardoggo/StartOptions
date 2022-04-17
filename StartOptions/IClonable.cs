@@ -1,4 +1,4 @@
-﻿namespace LunarDoggo.StartOptions.Interfaces
+﻿namespace LunarDoggo.StartOptions
 {
     public interface IClonable<T>
     {

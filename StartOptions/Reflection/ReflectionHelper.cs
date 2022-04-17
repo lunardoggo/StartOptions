@@ -1,4 +1,5 @@
-﻿using LunarDoggo.StartOptions.Parsing.Values;
+﻿using LunarDoggo.StartOptions.DependencyInjection;
+using LunarDoggo.StartOptions.Parsing.Values;
 using LunarDoggo.StartOptions.Exceptions;
 using LunarDoggo.StartOptions.Parsing;
 using System.Collections.Generic;
@@ -11,15 +12,22 @@ namespace LunarDoggo.StartOptions.Reflection
     internal class ReflectionHelper
     {
         private readonly Dictionary<string, ConstructorInfo> constructorCache = new Dictionary<string, ConstructorInfo>();
+        private readonly IDependencyProvider dependencyProvider;
         private readonly StartOptionParserSettings settings;
         private readonly HelpOption[] helpOptions;
 
-        public ReflectionHelper(IEnumerable<HelpOption> helpOptions, StartOptionParserSettings settings)
+        public ReflectionHelper(IEnumerable<HelpOption> helpOptions, StartOptionParserSettings settings, IDependencyProvider provider)
         {
             this.helpOptions = helpOptions.ToArray();
             this.settings = settings.Clone();
+            this.dependencyProvider = provider;
         }
 
+        /// <summary>
+        /// Creates an instance of an <see cref="IApplicationCommand"/> with the provided <see cref="ParsedStartOptions"/>
+        /// </summary>
+        /// <exception cref="OptionRequirementException"></exception>
+        /// <exception cref="KeyNotFoundException"></exception>
         public IApplicationCommand Instantiate(ParsedStartOptions parsedOptions)
         {
             if (parsedOptions.ParsedOptionGroup != null && this.constructorCache.TryGetValue(parsedOptions.ParsedOptionGroup.LongName, out ConstructorInfo constructor))
@@ -38,76 +46,135 @@ namespace LunarDoggo.StartOptions.Reflection
             StartOption[] allOptions = options.ParsedOptionGroup.Options.Concat(options.ParsedGrouplessOptions).ToArray();
             List<object> values = new List<object>();
 
-            foreach (ParameterInfo parameter in parameters)
+            foreach(ParameterInfo parameter in parameters)
             {
                 StartOptionAttribute attribute = parameter.GetCustomAttribute<StartOptionAttribute>();
-                StartOption option = allOptions.SingleOrDefault(_option => _option.LongName.Equals(attribute.LongName));
-
-                if (option != null)
+                if(attribute != null)
                 {
-                    switch (option.ValueType)
-                    {
-                        case StartOptionValueType.Switch:
-                            values.Add(true);
-                            break;
-                        case StartOptionValueType.Multiple:
-                        case StartOptionValueType.Single:
-                            values.Add(option.GetValue<object>());
-                            break;
-                    }
+                    StartOption option = allOptions.SingleOrDefault(_option => _option.LongName.Equals(attribute.LongName));
+                    values.Add(this.GetStartOptionConstructorParameterValue(parameter, attribute, option));
                 }
-                else if (attribute.ValueType == StartOptionValueType.Switch)
+                else if(this.dependencyProvider != null)
                 {
-                    values.Add(false);
-                }
-                else
-                {
-                    values.Add(parameter.ParameterType.GetTypeInfo().IsValueType ? Activator.CreateInstance(parameter.ParameterType) : null);
+                    values.Add(this.dependencyProvider.GetDependency(parameter.ParameterType));
                 }
             }
+
             return values.ToArray();
         }
 
-        public ApplicationStartOptions GetStartOptions(params Type[] types)
+        private object GetStartOptionConstructorParameterValue(ParameterInfo parameter, StartOptionAttribute attribute, StartOption option)
         {
-            List<StartOptionGroupsParameter> parameters = new List<StartOptionGroupsParameter>();
-            foreach (Type type in types)
+            if(option != null)
             {
-                parameters.Add(this.GetStartOptions(type, type.GetTypeInfo()));
+                switch(option.ValueType)
+                {
+                    case StartOptionValueType.Switch:
+                        return true;
+                    case StartOptionValueType.Multiple:
+                    case StartOptionValueType.Single:
+                        return option.GetValue<object>();
+                    default:
+                        throw new NotImplementedException($"The StartOptionValueType \"{option.ValueType}\" isn't implemented yet");
+                }
             }
-            ApplicationStartOptions options = new ApplicationStartOptions(parameters.Select(_param => _param.Groups).SelectMany(_grp => _grp).ToArray(),
-                                                                          parameters.Select(_param => _param.GrouplessOptions).SelectMany(_opt => _opt).Distinct(StartOptionComparer.Instance).ToArray(),
-                                                                          this.helpOptions, this.settings);
-            this.ValidateStartOptionNames(options.StartOptionGroups, options.GrouplessStartOptions);
-            return options;
+            else if(attribute.ValueType == StartOptionValueType.Switch)
+            {
+                return false;
+            }
+
+            return !parameter.ParameterType.GetTypeInfo().IsValueType ? null : Activator.CreateInstance(parameter.ParameterType);
         }
 
-        private StartOptionGroupsParameter GetStartOptions(Type type, TypeInfo typeInfo)
+        /// <summary>
+        /// Returns the <see cref="ApplicationStartOptions"/> from all constructors of the given types which
+        /// are decorated with the <see cref="StartOptionGroupAttribute"/>
+        /// </summary>
+        /// <exception cref="InvalidOperationException"></exception>
+        /// <exception cref="NotSupportedException"></exception>
+        /// <exception cref="NameConflictException"></exception>
+        /// <exception cref="InvalidNameException"></exception>
+        public ApplicationStartOptions GetStartOptions(params Type[] types)
         {
-            this.ValidateTypeInfo(type, typeInfo);
-
-            ConstructorInfo[] constructors = typeInfo.DeclaredConstructors.Where(_constructor => _constructor.GetCustomAttribute<StartOptionGroupAttribute>(true) != null && _constructor.IsPublic && !_constructor.IsStatic).ToArray();
-
             List<StartOptionGroup> groups = new List<StartOptionGroup>();
-            List<StartOption> grouplessOptions = new List<StartOption>();
+            List<StartOption> options = new List<StartOption>();
 
-            foreach (ConstructorInfo constructor in constructors)
+            foreach(Type type in types)
             {
-                StartOptionGroupParameter? group = this.GetStartOptionGroup(type, constructor);
+                this.ValidateTypeInfo(type, type.GetTypeInfo());
+                this.ProcessTypeOptions(type, ref groups, ref options);
+            }
 
-                if (group.HasValue)
+            ApplicationStartOptions startOptions = new ApplicationStartOptions(groups, options.Distinct(StartOptionComparer.Instance), this.helpOptions, this.settings);
+            this.ValidateStartOptionNames(startOptions.StartOptionGroups, startOptions.GrouplessStartOptions);
+            return startOptions;
+        }
+
+        private void ProcessTypeOptions(Type type, ref List<StartOptionGroup> groups, ref List<StartOption> options)
+        {
+            List<StartOption> grouplessOptionCache = new List<StartOption>();
+            List<StartOption> groupOptionCache = new List<StartOption>();
+
+            foreach (ConstructorInfo constructor in type.GetTypeInfo().DeclaredConstructors.Where(_constructor => this.IsFeasableConstructor(_constructor)))
+            {
+                StartOptionGroupAttribute attribute = constructor.GetCustomAttribute<StartOptionGroupAttribute>();
+                if(attribute != null)
                 {
-                    grouplessOptions.AddRange(group.Value.GrouplessOptions);
-                    groups.Add(group.Value.Group);
-
-                    if (!this.constructorCache.ContainsKey(group.Value.Group.LongName))
+                    ConstructorStartOptions constructorOptions = this.GetConstructorStartOptions(attribute, constructor, ref groupOptionCache, ref grouplessOptionCache);
+                    if (constructorOptions.Options.Any())
                     {
-                        this.constructorCache.Add(group.Value.Group.LongName, constructor);
+                        options.AddRange(constructorOptions.Options);
+                    }
+                    groups.Add(constructorOptions.Group);
+                    if (!this.constructorCache.ContainsKey(constructorOptions.Group.LongName))
+                    {
+                        this.constructorCache.Add(constructorOptions.Group.LongName, constructor);
+                    }
+                }
+            }
+        }
+
+        private bool IsFeasableConstructor(ConstructorInfo constructor)
+        {
+            return constructor.GetCustomAttribute<StartOptionGroupAttribute>(true) != null && constructor.IsPublic && !constructor.IsStatic;
+        }
+
+        private ConstructorStartOptions GetConstructorStartOptions(StartOptionGroupAttribute attribute, ConstructorInfo constructor, ref List<StartOption> groupOptionCache, ref List<StartOption> grouplessOptionCache)
+        {
+            grouplessOptionCache.Clear();
+            groupOptionCache.Clear();
+
+            foreach(ParameterInfo parameter in constructor.GetParameters())
+            {
+                StartOptionAttribute optionAttribute = parameter.GetCustomAttribute<StartOptionAttribute>();
+                if(optionAttribute == null && this.dependencyProvider == null)
+                {
+                    throw new InvalidOperationException("All constructor parameters must be decorated with the StartOptionAttribute unless a IDependencyProvider is provided");
+                }
+                else if(optionAttribute != null)
+                {
+                    StartOption option = this.GetStartOption(optionAttribute);
+                    if(optionAttribute.IsGrouplessOption)
+                    {
+                        grouplessOptionCache.Add(option);
+                    }
+                    else
+                    {
+                        groupOptionCache.Add(option);
                     }
                 }
             }
 
-            return new StartOptionGroupsParameter(groups, grouplessOptions);
+            return new ConstructorStartOptions()
+            {
+                Group = new StartOptionGroup(attribute.LongName, attribute.ShortName, attribute.Description, groupOptionCache),
+                Options = grouplessOptionCache
+            };
+        }
+
+        private StartOption GetStartOption(StartOptionAttribute attribute)
+        {
+            return new StartOption(attribute.LongName, attribute.ShortName, attribute.Description, StartOptionValueParserRegistry.GetParser(attribute.ParserType), attribute.ValueType, attribute.Mandatory);
         }
 
         private void ValidateTypeInfo(Type type, TypeInfo typeInfo)
@@ -132,121 +199,15 @@ namespace LunarDoggo.StartOptions.Reflection
             validator.CheckNameConflicts();
         }
 
-        private StartOptionGroupParameter? GetStartOptionGroup(Type type, ConstructorInfo constructor)
-        {
-            StartOptionGroupAttribute attribute = constructor.GetCustomAttribute<StartOptionGroupAttribute>();
-
-            if (attribute != null)
-            {
-                List<StartOption> grouplessOptions = new List<StartOption>();
-                List<StartOption> options = new List<StartOption>();
-
-                foreach (ParameterInfo parameter in constructor.GetParameters())
-                {
-                    StartOptionParameter option = this.GetStartOption(type, parameter);
-
-                    if (option.IsGrouplessOption)
-                    {
-                        grouplessOptions.Add(option.Option);
-                    }
-                    else
-                    {
-                        options.Add(option.Option);
-                    }
-                }
-
-                StartOptionGroup group = new StartOptionGroup(attribute.LongName, attribute.ShortName, attribute.Description, options);
-                return new StartOptionGroupParameter(group, grouplessOptions);
-            }
-            return null;
-        }
-
-        private StartOptionParameter GetStartOption(Type type, ParameterInfo parameter)
-        {
-            StartOptionAttribute attribute = parameter.GetCustomAttribute<StartOptionAttribute>();
-            if (attribute == null)
-            {
-                throw new NotSupportedException("All constructor parameters must be decorated with the StartOptionAttribute.", this.GetTypeInQuestionException(type));
-            }
-
-            IStartOptionValueParser parser = StartOptionValueParserRegistry.GetParser(attribute.ParserType);
-            StartOption option = new StartOption(attribute.LongName, attribute.ShortName, attribute.Description, parser, attribute.ValueType, attribute.Mandatory);
-            return new StartOptionParameter(option, attribute.IsGrouplessOption);
-        }
-
         private Exception GetTypeInQuestionException(Type type)
         {
             return new Exception("Type in question: " + type.GetTypeInfo().FullName);
         }
 
-        private struct StartOptionParameter
+        private struct ConstructorStartOptions
         {
-            public StartOptionParameter(StartOption option, bool isGrouplessOption)
-            {
-                this.IsGrouplessOption = isGrouplessOption;
-                this.Option = option;
-            }
-
-            public bool IsGrouplessOption { get; set; }
-            public StartOption Option { get; set; }
-        }
-
-        private struct StartOptionGroupParameter
-        {
-            public StartOptionGroupParameter(StartOptionGroup group, List<StartOption> grouplessOptions)
-            {
-                this.GrouplessOptions = grouplessOptions;
-                this.Group = group;
-            }
-
-            public List<StartOption> GrouplessOptions { get; set; }
+            public IEnumerable<StartOption> Options { get; set; }
             public StartOptionGroup Group { get; set; }
-        }
-
-        private struct StartOptionGroupsParameter
-        {
-            public StartOptionGroupsParameter(IEnumerable<StartOptionGroup> groups, IEnumerable<StartOption> grouplessOptions)
-            {
-                this.GrouplessOptions = grouplessOptions;
-                this.Groups = groups;
-            }
-
-            public IEnumerable<StartOption> GrouplessOptions { get; set; }
-            public IEnumerable<StartOptionGroup> Groups { get; set; }
-        }
-
-        private class StartOptionComparer : IEqualityComparer<StartOption>
-        {
-            public static StartOptionComparer Instance { get; }
-            static StartOptionComparer()
-            {
-                StartOptionComparer.Instance = new StartOptionComparer();
-            }
-
-            public bool Equals(StartOption x, StartOption y)
-            {
-                return x == null && y == null ||
-                       x.IsRequired == y.IsRequired
-                    && x.LongName.Equals(y.LongName)
-                    && x.ShortName.Equals(y.ShortName)
-                    && x.Description.Equals(y.Description)
-                    && x.ValueType == y.ValueType
-                    && (x.ParserType == null && y.ParserType == null || x.ParserType == y.ParserType);
-            }
-
-            public int GetHashCode(StartOption option)
-            {
-                if (option == null)
-                {
-                    return 0;
-                }
-
-                unchecked
-                {
-                    return option.LongName.GetHashCode() * option.ShortName.GetHashCode() * option.Description.GetHashCode()
-                         * option.IsRequired.GetHashCode() * option.ValueType.GetHashCode() * (option.ParserType?.FullName ?? String.Empty).GetHashCode();
-                }
-            }
         }
     }
 }

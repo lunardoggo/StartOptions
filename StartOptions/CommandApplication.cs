@@ -1,4 +1,5 @@
-﻿using LunarDoggo.StartOptions.Reflection;
+﻿using LunarDoggo.StartOptions.DependencyInjection;
+using LunarDoggo.StartOptions.Reflection;
 using LunarDoggo.StartOptions.Parsing;
 using System.Collections.Generic;
 using System;
@@ -14,7 +15,7 @@ namespace LunarDoggo.StartOptions
             StartOptionParserSettings settings = this.GetParserSettings();
             IEnumerable<HelpOption> helpOptions = this.GetHelpOptions();
             Type[] commandTypes = this.GetCommandTypes();
-            this.helper = new ReflectionHelper(helpOptions, settings);
+            this.helper = new ReflectionHelper(helpOptions, settings, this.GetDependencyProvider());
             return this.helper.GetStartOptions(commandTypes);
         }
 
@@ -36,6 +37,7 @@ namespace LunarDoggo.StartOptions
         {
             return new StartOptionParserSettings();
         }
+
         /// <summary>
         /// Returns all <see cref="HelpOption"/>s supported by the application
         /// </summary>
@@ -43,11 +45,18 @@ namespace LunarDoggo.StartOptions
         {
             return StartOptionParser.DefaultHelpOptions;
         }
+
         /// <summary>
         /// Returns types of commands the application supports. All types must implement
         /// <see cref="IApplicationCommand"/>, must not be abstract and must contain at least one constructor
         /// decorated with <see cref="StartOptionGroupAttribute"/>
         /// </summary>
         protected abstract Type[] GetCommandTypes();
+
+        /// <summary>
+        /// Returns the <see cref="IDependencyProvider"/> to fill your command's constructor parameters that aren't
+        /// decorated with a <see cref="StartOptionAttribute"/>
+        /// </summary>
+        protected abstract IDependencyProvider GetDependencyProvider();
     }
 }

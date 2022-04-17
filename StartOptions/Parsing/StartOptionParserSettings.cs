@@ -1,6 +1,4 @@
-﻿using LunarDoggo.StartOptions.Interfaces;
-
-namespace LunarDoggo.StartOptions.Parsing
+﻿namespace LunarDoggo.StartOptions.Parsing
 {
     public class StartOptionParserSettings : IClonable<StartOptionParserSettings>
     {
