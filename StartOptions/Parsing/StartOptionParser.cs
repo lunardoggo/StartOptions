@@ -1,4 +1,5 @@
 ﻿using LunarDoggo.StartOptions.Parsing.Arguments;
+using LunarDoggo.StartOptions.Exceptions;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Collections.Immutable;
@@ -27,6 +28,11 @@ namespace LunarDoggo.StartOptions.Parsing
         private readonly StartOptionParserSettings settings;
         private readonly HelpOption[] helpOptions;
 
+        /// <summary>
+        /// Creates a new instance of a <see cref="StartOptionParser"/> with the provided parameters
+        /// </summary>
+        /// <exception cref="NameConflictException"></exception>
+        /// <exception cref="ArgumentException"></exception>
         public StartOptionParser(StartOptionParserSettings settings, IEnumerable<StartOptionGroup> groups,
                                  IEnumerable<StartOption> grouplessOptions, IEnumerable<HelpOption> helpOptions,
                                  bool validateNameConflics = true)
@@ -72,14 +78,30 @@ namespace LunarDoggo.StartOptions.Parsing
             return helpOptions.Select(_help => _help.Clone()).ToArray();
         }
 
+        /// <summary>
+        /// Creates a new instance of a <see cref="StartOptionParser"/> with the provided parameters
+        /// </summary>
+        /// <exception cref="NameConflictException"></exception>
+        /// <exception cref="ArgumentException"></exception>
         public StartOptionParser(IEnumerable<StartOptionGroup> groups, IEnumerable<StartOption> grouplessOptions, IEnumerable<HelpOption> helpOptions)
             : this(new StartOptionParserSettings(), groups, grouplessOptions, helpOptions)
         { }
 
+        /// <summary>
+        /// Creates a new instance of a <see cref="StartOptionParser"/> with the provided parameters
+        /// </summary>
+        /// <exception cref="NameConflictException"></exception>
+        /// <exception cref="ArgumentException"></exception>
         public StartOptionParser(IEnumerable<StartOptionGroup> groups, IEnumerable<StartOption> grouplessOptions)
             : this(new StartOptionParserSettings(), groups, grouplessOptions, StartOptionParser.DefaultHelpOptions)
         { }
 
+        /// <summary>
+        /// Parses the provided command line arguments and turns them into a <see cref="StartOptionGroup"/> and <see cref="StartOption"/>s.
+        /// The output only contains parameters that were contained in the command line arguments
+        /// </summary>
+        /// <exception cref="OptionRequirementException"></exception>
+        /// <exception cref="UnknownOptionNameException"></exception>
         public ParsedStartOptions Parse(string[] args)
         {
             List<ParsedStartArgument> parsedOptions = this.GetParsedStartOptions(args).ToList();

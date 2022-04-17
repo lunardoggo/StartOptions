@@ -6,6 +6,10 @@ namespace LunarDoggo.StartOptions
 {
     public class HelpOption : IClonable<HelpOption>
     {
+        /// <summary>
+        /// Creates a new instance of <see cref="HelpOption"/> with the provided parameters
+        /// </summary>
+        /// <exception cref="InvalidNameException"></exception>
         public HelpOption(string name, bool isShortName)
         {
             this.IsShortName = isShortName;
