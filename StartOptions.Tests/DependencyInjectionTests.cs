@@ -19,6 +19,9 @@ namespace StartOptions.Tests
 
             provider.AddSingleton("value");
             Assert.Throws<ArgumentException>(() => provider.AddSingleton("abc"));
+
+            provider = new SimpleDependencyProvider(false);
+            Assert.Null(provider.GetDependency<object>());
         }
 
         [Fact]

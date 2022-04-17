@@ -63,7 +63,7 @@ namespace StartOptions.Tests
         [Fact]
         public void TestInstantiationWithDependencyResolver()
         {
-            ReflectionHelper helper = this.GetReflectionHelperWithDependencies();
+            ReflectionHelper helper = this.GetReflectionHelperWithDependencies(false);
             ParsedStartOptions parsedOptions = this.GetParsedStartOptions(helper, typeof(DependencyProviderCommand), new string[] { "-a", "-u=user.name", "-d=User Name" });
 
             IApplicationCommand command = helper.Instantiate(parsedOptions);
@@ -74,10 +74,14 @@ namespace StartOptions.Tests
         [Fact]
         public void TestInstantiationWithMissingDependencies()
         {
-            ReflectionHelper helper = this.GetReflectionHelperWithDependencies();
+            ReflectionHelper helper = this.GetReflectionHelperWithDependencies(true);
             ParsedStartOptions parsedOptions = this.GetParsedStartOptions(helper, typeof(UnrelatedConstructorParameterCommand), new string[] { "-g", "-o=abc" });
 
             Assert.Throws<KeyNotFoundException>(() => helper.Instantiate(parsedOptions));
+            
+            helper = this.GetReflectionHelperWithDependencies(false);
+            parsedOptions = this.GetParsedStartOptions(helper, typeof(UnrelatedConstructorParameterCommand), new string[] { "-g", "-o=abc" });
+            Assert.IsType<UnrelatedConstructorParameterCommand>(helper.Instantiate(parsedOptions));
         }
 
         private Tuple<ReflectionHelper, ParsedStartOptions> GetHelperOptionsTuple(bool requireGroup, Type commandType, string[] args)
@@ -96,9 +100,9 @@ namespace StartOptions.Tests
             return parser.Parse(args);
         }
 
-        private ReflectionHelper GetReflectionHelperWithDependencies()
+        private ReflectionHelper GetReflectionHelperWithDependencies(bool throwIfKeyNotFound)
         {
-            SimpleDependencyProvider provider = new SimpleDependencyProvider(false);
+            SimpleDependencyProvider provider = new SimpleDependencyProvider(throwIfKeyNotFound);
             provider.AddSingleton<IDatabase>(new MockDatabase());
             IEnumerable<HelpOption> helpOptions = new HelpOption[] { new HelpOption("help", false), new HelpOption("h", true) };
             return new ReflectionHelper(helpOptions, new StartOptionParserSettings(), provider);
