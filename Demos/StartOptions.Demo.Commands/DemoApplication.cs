@@ -37,7 +37,7 @@ namespace StartOptions.Demo
             return new StartOptionParserSettings()
             {
                 RequireStartOptionGroup = true,
-                ShortOptionNamePrefix = "-",
+                ShortOptionNamePrefix = "--",
                 LongOptionNamePrefix = "/",
                 OptionValueSeparator = ' ',
             };
