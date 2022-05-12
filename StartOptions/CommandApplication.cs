@@ -26,7 +26,6 @@ namespace LunarDoggo.StartOptions
             {
                 throw new NullReferenceException("Couldn't instantiate an IApplicationCommand with the provided parameters");
             }
-            Console.WriteLine(command.GetType().FullName);
             command.Execute();
         }
 
