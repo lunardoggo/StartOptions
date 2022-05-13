@@ -1,35 +1,24 @@
-﻿using System.Collections.Immutable;
+﻿using LunarDoggo.StartOptions.Parsing.Values;
+using System.Collections.Immutable;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace LunarDoggo.StartOptions
 {
-    public class StartOptionGroup : IClonable<StartOptionGroup>
+    public class StartOptionGroup : BaseStartOption, IClonable<StartOptionGroup>
     {
-        public StartOptionGroup(string longName, string shortName, string description, IEnumerable<StartOption> options)
+        public StartOptionGroup(string longName, string shortName, string description, IStartOptionValueParser valueParser, StartOptionValueType valueType, IEnumerable<StartOption> options)
+            : base(longName, shortName, description, valueType, valueParser)
         {
             this.Options = (options ?? new StartOption[0]).ToImmutableList();
-            this.Description = description;
-            this.ShortName = shortName;
-            this.LongName = longName;
         }
+
+        internal IStartOptionValueParser ValueParser { get { return this.valueParser; } }
 
         /// <summary>
         /// Returns all <see cref="StartOption"/>s contained in the <see cref="StartOptionGroup"/>
         /// </summary>
         public IEnumerable<StartOption> Options { get; }
-        /// <summary>
-        /// Returns the description of the <see cref="StartOptionGroup"/>
-        /// </summary>
-        public string Description { get; }
-        /// <summary>
-        /// Returns the short name of the <see cref="StartOptionGroup"/>
-        /// </summary>
-        public string ShortName { get; }
-        /// <summary>
-        /// Returns the long name of the <see cref="StartOptionGroup"/>
-        /// </summary>
-        public string LongName { get; }
 
         /// <summary>
         /// Returns the <see cref="StartOption"/> contained in the <see cref="StartOptionGroup"/> with the provided short name
@@ -52,7 +41,7 @@ namespace LunarDoggo.StartOptions
         /// </summary>
         public StartOptionGroup Clone()
         {
-            return new StartOptionGroup(this.LongName, this.ShortName, this.Description,
+            return new StartOptionGroup(this.LongName, this.ShortName, this.Description, this.valueParser, this.ValueType,
                                         this.Options.Select(_option => _option.Clone()));
         }
     }

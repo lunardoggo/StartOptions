@@ -1,5 +1,5 @@
-﻿using LunarDoggo.StartOptions;
-using LunarDoggo.StartOptions.Parsing.Values;
+﻿using LunarDoggo.StartOptions.Parsing.Values;
+using LunarDoggo.StartOptions;
 using System;
 
 namespace StartOptions.Tests.Mocks.Commands

@@ -145,23 +145,26 @@ namespace LunarDoggo.StartOptions.Parsing
 
         private StartOptionGroup GetStartOptionGroup(ref List<ParsedStartArgument> parsedOptions)
         {
-            List<StartOptionGroup> groups = new List<StartOptionGroup>();
+            Dictionary<StartOptionGroup, ParsedStartArgument> groups = new Dictionary<StartOptionGroup, ParsedStartArgument>();
             for (int i = parsedOptions.Count - 1; i >= 0; i--)
             {
                 ParsedStartArgument current = parsedOptions[i];
                 StartOptionGroup found = this.FindStartOptionGroupForParsedStartOption(current);
                 if (found != null)
                 {
-                    groups.Add(found);
+                    groups.Add(found, current);
                     parsedOptions.RemoveAt(i);
                 }
             }
 
             if (groups.Any())
             {
-                StartOptionGroup group = groups.SingleOrDefault();
+                KeyValuePair<StartOptionGroup, ParsedStartArgument> pair = groups.Single();
+                StartOptionGroup group = pair.Key;
                 IEnumerable<StartOption> options = this.GetStartOptions(group.Options, ref parsedOptions);
-                return new StartOptionGroup(group.LongName, group.ShortName, group.Description, options);
+                StartOptionGroup output = new StartOptionGroup(group.LongName, group.ShortName, group.Description, group.ValueParser, group.ValueType, options);
+                this.ParseOptionValue(output, pair.Value.Value);
+                return output;
             }
             return null;
         }
@@ -199,15 +202,19 @@ namespace LunarDoggo.StartOptions.Parsing
             return output;
         }
 
-        private void ParseOptionValue(StartOption option, string value)
+        private void ParseOptionValue(BaseStartOption option, string value)
         {
-            if (value.Contains(this.settings.MultipleValueSeparator))
+            //TODO: Throw Exception if option has value type mismatch (i.e. Switch or is single but got multiple values)
+            if (option.ValueType != StartOptionValueType.Switch)
             {
-                option.ParseMultipleValues(value.Split(new char[] { this.settings.MultipleValueSeparator }, StringSplitOptions.RemoveEmptyEntries));
-            }
-            else
-            {
-                option.ParseSingleValue(value);
+                if (value.Contains(this.settings.MultipleValueSeparator))
+                {
+                    option.ParseMultipleValues(value.Split(new char[] { this.settings.MultipleValueSeparator }, StringSplitOptions.RemoveEmptyEntries));
+                }
+                else
+                {
+                    option.ParseSingleValue(value);
+                }
             }
         }
 

@@ -46,15 +46,22 @@ namespace LunarDoggo.StartOptions.Reflection
             StartOption[] allOptions = options.ParsedOptionGroup.Options.Concat(options.ParsedGrouplessOptions).ToArray();
             List<object> values = new List<object>();
 
-            foreach(ParameterInfo parameter in parameters)
+            foreach (ParameterInfo parameter in parameters)
             {
-                StartOptionAttribute attribute = parameter.GetCustomAttribute<StartOptionAttribute>();
-                if(attribute != null)
+                StartOptionGroupValueAttribute groupAttribute = parameter.GetCustomAttribute<StartOptionGroupValueAttribute>();
+                StartOptionAttribute optionAttribute = parameter.GetCustomAttribute<StartOptionAttribute>();
+
+                if (optionAttribute != null)
                 {
-                    StartOption option = allOptions.SingleOrDefault(_option => _option.LongName.Equals(attribute.LongName));
-                    values.Add(this.GetStartOptionConstructorParameterValue(parameter, attribute, option));
+                    StartOption option = allOptions.SingleOrDefault(_option => _option.LongName.Equals(optionAttribute.LongName));
+                    values.Add(this.GetStartOptionConstructorParameterValue(parameter, optionAttribute.ValueType, option));
                 }
-                else if(this.dependencyProvider != null)
+                else if (groupAttribute != null)
+                {
+                    StartOptionGroup group = options.ParsedOptionGroup;
+                    values.Add(this.GetStartOptionConstructorParameterValue(parameter, group.ValueType, group));
+                }
+                else if (this.dependencyProvider != null)
                 {
                     values.Add(this.dependencyProvider.GetDependency(parameter.ParameterType));
                 }
@@ -63,11 +70,11 @@ namespace LunarDoggo.StartOptions.Reflection
             return values.ToArray();
         }
 
-        private object GetStartOptionConstructorParameterValue(ParameterInfo parameter, StartOptionAttribute attribute, StartOption option)
+        private object GetStartOptionConstructorParameterValue(ParameterInfo parameter, StartOptionValueType attributeValueType, BaseStartOption option)
         {
-            if(option != null)
+            if (option != null)
             {
-                switch(option.ValueType)
+                switch (option.ValueType)
                 {
                     case StartOptionValueType.Switch:
                         return true;
@@ -78,7 +85,7 @@ namespace LunarDoggo.StartOptions.Reflection
                         throw new NotImplementedException($"The StartOptionValueType \"{option.ValueType}\" isn't implemented yet");
                 }
             }
-            else if(attribute.ValueType == StartOptionValueType.Switch)
+            else if (attributeValueType == StartOptionValueType.Switch)
             {
                 return false;
             }
@@ -99,7 +106,7 @@ namespace LunarDoggo.StartOptions.Reflection
             List<StartOptionGroup> groups = new List<StartOptionGroup>();
             List<StartOption> options = new List<StartOption>();
 
-            foreach(Type type in types)
+            foreach (Type type in types)
             {
                 this.ValidateTypeInfo(type, type.GetTypeInfo());
                 this.ProcessTypeOptions(type, ref groups, ref options);
@@ -118,7 +125,7 @@ namespace LunarDoggo.StartOptions.Reflection
             foreach (ConstructorInfo constructor in type.GetTypeInfo().DeclaredConstructors.Where(_constructor => this.IsFeasableConstructor(_constructor)))
             {
                 StartOptionGroupAttribute attribute = constructor.GetCustomAttribute<StartOptionGroupAttribute>();
-                if(attribute != null)
+                if (attribute != null)
                 {
                     ConstructorStartOptions constructorOptions = this.GetConstructorStartOptions(attribute, constructor, ref groupOptionCache, ref grouplessOptionCache);
                     if (constructorOptions.Options.Any())
@@ -144,17 +151,17 @@ namespace LunarDoggo.StartOptions.Reflection
             grouplessOptionCache.Clear();
             groupOptionCache.Clear();
 
-            foreach(ParameterInfo parameter in constructor.GetParameters())
+            foreach (ParameterInfo parameter in constructor.GetParameters())
             {
                 StartOptionAttribute optionAttribute = parameter.GetCustomAttribute<StartOptionAttribute>();
-                if(optionAttribute == null && this.dependencyProvider == null)
+                if (optionAttribute == null && this.dependencyProvider == null)
                 {
                     throw new InvalidOperationException("All constructor parameters must be decorated with the StartOptionAttribute unless a IDependencyProvider is provided");
                 }
-                else if(optionAttribute != null)
+                else if (optionAttribute != null)
                 {
                     StartOption option = this.GetStartOption(optionAttribute);
-                    if(optionAttribute.IsGrouplessOption)
+                    if (optionAttribute.IsGrouplessOption)
                     {
                         grouplessOptionCache.Add(option);
                     }
@@ -165,9 +172,10 @@ namespace LunarDoggo.StartOptions.Reflection
                 }
             }
 
+            IStartOptionValueParser parser = StartOptionValueParserRegistry.GetParser(attribute.ParserType);
             return new ConstructorStartOptions()
             {
-                Group = new StartOptionGroup(attribute.LongName, attribute.ShortName, attribute.Description, groupOptionCache),
+                Group = new StartOptionGroup(attribute.LongName, attribute.ShortName, attribute.Description, parser, attribute.ValueType, groupOptionCache),
                 Options = grouplessOptionCache
             };
         }

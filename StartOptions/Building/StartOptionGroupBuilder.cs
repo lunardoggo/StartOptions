@@ -1,4 +1,5 @@
-﻿using LunarDoggo.StartOptions.Exceptions;
+﻿using LunarDoggo.StartOptions.Parsing.Values;
+using LunarDoggo.StartOptions.Exceptions;
 using System.Collections.Generic;
 using System;
 
@@ -7,6 +8,8 @@ namespace LunarDoggo.StartOptions.Building
     public class StartOptionGroupBuilder : AbstractOptionBuilder<StartOptionGroup>
     {
         private readonly List<StartOption> options = new List<StartOption>();
+        private StartOptionValueType valueType = StartOptionValueType.Switch;
+        private IStartOptionValueParser parser;
         private string description;
 
         /// <summary>
@@ -21,6 +24,25 @@ namespace LunarDoggo.StartOptions.Building
         public StartOptionGroupBuilder SetDescription(string description)
         {
             this.description = description;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the value type of the <see cref="StartOptionGroup"/>. Default is <see cref="StartOptionValueType.Switch"/> (i.e. no value)
+        /// </summary>
+        public StartOptionGroupBuilder SetValueType(StartOptionValueType valueType)
+        {
+            this.valueType = valueType;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the <see cref="IStartOptionValueParser"/> to be used to parser provided values. Make sure to
+        /// also set <see cref="SetValueType(StartOptionValueType)"/> when using this method
+        /// </summary>
+        public StartOptionGroupBuilder SetValueParser(IStartOptionValueParser parser)
+        {
+            this.parser = parser;
             return this;
         }
 
@@ -49,7 +71,7 @@ namespace LunarDoggo.StartOptions.Building
         /// </summary>
         public override StartOptionGroup Build()
         {
-            return new StartOptionGroup(this.longName, this.shortName, this.description, this.options);
+            return new StartOptionGroup(this.longName, this.shortName, this.description, this.parser, this.valueType, this.options);
         }
 
         private void CheckForNameDuplications(StartOption newOption)

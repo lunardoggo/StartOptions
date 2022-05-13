@@ -114,6 +114,18 @@ namespace StartOptions.Tests
             Assert.IsType<UnrelatedConstructorParameterCommand>(helper.Instantiate(parsedOptions));
         }
 
+        [Fact]
+        public void TestInstantiateWithGroupValues()
+        {
+            ReflectionHelper helper = this.GetReflectionHelperWithDependencies(true);
+            ParsedStartOptions parsedOptions = this.GetParsedStartOptions(helper, typeof(GroupValueCommand), new string[] { "-s=1,2,3,4" });
+
+            GroupValueCommand command = helper.Instantiate(parsedOptions) as GroupValueCommand;
+            Assert.NotNull(command);
+            Assert.NotNull(command.Values);
+            Assert.Equal(4, command.Values.Length);
+        }
+
         private Tuple<ReflectionHelper, ParsedStartOptions> GetHelperOptionsTuple(bool requireGroup, Type commandType, string[] args)
         {
             ReflectionHelper helper = this.GetDefaultReflectionHelper(requireGroup);

@@ -1,9 +1,11 @@
-﻿using LunarDoggo.StartOptions.Building;
+﻿using LunarDoggo.StartOptions.Parsing.Values;
+using LunarDoggo.StartOptions.Exceptions;
+using LunarDoggo.StartOptions.Building;
 using LunarDoggo.StartOptions.Parsing;
 using LunarDoggo.StartOptions;
 using System.Linq;
+using System;
 using Xunit;
-using LunarDoggo.StartOptions.Exceptions;
 
 namespace StartOptions.Tests
 {
@@ -36,6 +38,7 @@ namespace StartOptions.Tests
             Assert.NotNull(parsed.ParsedOptionGroup);
             StartOptionGroup group = parsed.ParsedOptionGroup;
 
+            Assert.False(group.HasValue);
             Assert.Equal("e", group.ShortName);
             this.AssertStartOptionHasValue(group.GetOptionByShortName("u"), "testuser");
             this.AssertStartOptionHasValue(group.GetOptionByShortName("p"), "./user.txt");
@@ -55,6 +58,7 @@ namespace StartOptions.Tests
             Assert.NotNull(parsed.ParsedOptionGroup);
             StartOptionGroup group = parsed.ParsedOptionGroup;
 
+            Assert.False(group.HasValue);
             Assert.Equal("i", group.ShortName);
             this.AssertStartOptionHasValue(group.GetOptionByShortName("p"), "./user.txt");
             Assert.NotNull(group.GetOptionByShortName("f"));
@@ -103,11 +107,13 @@ namespace StartOptions.Tests
 
             ParsedStartOptions firstOptions = parser.Parse(new string[] { "-g", "-gr", "-r" });
             Assert.NotNull(firstOptions.ParsedOptionGroup);
+            Assert.False(firstOptions.ParsedOptionGroup.HasValue);
             Assert.Contains(firstOptions.ParsedOptionGroup.Options, _option => _option.ShortName.Equals("gr"));
             Assert.Contains(firstOptions.ParsedGrouplessOptions, _option => _option.ShortName.Equals("r"));
 
             ParsedStartOptions secondOptions = parser.Parse(new string[] { "-g", "-gr", "-go", "-r", "-o" });
             Assert.NotNull(secondOptions.ParsedOptionGroup);
+            Assert.False(secondOptions.ParsedOptionGroup.HasValue);
             Assert.Contains(secondOptions.ParsedOptionGroup.Options, _option => _option.ShortName.Equals("gr"));
             Assert.Contains(secondOptions.ParsedOptionGroup.Options, _option => _option.ShortName.Equals("go"));
             Assert.Contains(secondOptions.ParsedGrouplessOptions, _option => _option.ShortName.Equals("r"));
@@ -133,11 +139,39 @@ namespace StartOptions.Tests
             parser.Parse(new string[] { "-h" });
         }
 
-        private StartOptionParser GetOptionParserWithRequiredOptions()
+        [Fact]
+        public void TestParseStartOptionGroupWithStringValue()
+        {
+            StartOptionParser parser = this.GetOptionParserWithRequiredOptions(StartOptionValueType.Single, null);
+
+            ParsedStartOptions firstOptions = parser.Parse(new string[] { "-g=test", "-gr", "-r" });
+            StartOptionGroup group = firstOptions.ParsedOptionGroup;
+            Assert.NotNull(group);
+            Assert.True(group.HasValue);
+            Assert.Equal("test", group.GetValue<string>());
+            Assert.Contains(firstOptions.ParsedOptionGroup.Options, _option => _option.ShortName.Equals("gr"));
+        }
+
+        [Fact]
+        public void TestParseStartOptionGroupWithIntValue()
+        {
+            StartOptionParser parser = this.GetOptionParserWithRequiredOptions(StartOptionValueType.Single, new Int32OptionValueParser());
+
+            ParsedStartOptions firstOptions = parser.Parse(new string[] { "-g=42", "-gr", "-r" });
+            StartOptionGroup group = firstOptions.ParsedOptionGroup;
+            Assert.NotNull(group);
+            Assert.True(group.HasValue);
+            Assert.Equal(42, group.GetValue<Int32>());
+            Assert.Contains(firstOptions.ParsedOptionGroup.Options, _option => _option.ShortName.Equals("gr"));
+        }
+
+        private StartOptionParser GetOptionParserWithRequiredOptions(StartOptionValueType groupValueType = StartOptionValueType.Switch, IStartOptionValueParser groupValueParser = null)
         {
             StartOptionGroup[] groups = new StartOptionGroup[]
             {
                 new StartOptionGroupBuilder("group", "g")
+                    .SetValueParser(groupValueParser)
+                    .SetValueType(groupValueType)
                     .AddOption("groupOptional", "go", _builder => _builder.SetRequired(false))
                     .AddOption("groupRequired", "gr", _builder => _builder.SetRequired(true))
                     .Build()
@@ -159,7 +193,7 @@ namespace StartOptions.Tests
 
         private StartOptionParser GetDefaultStartOptionParser()
         {
-            return this.GetStartOptionParser(new StartOptionParserSettings(), StartOptionParserParsingTests.HelpOptions);
+            return base.GetStartOptionParser(new StartOptionParserSettings(), StartOptionParserParsingTests.HelpOptions);
         }
     }
 }
