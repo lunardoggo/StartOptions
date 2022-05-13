@@ -34,6 +34,9 @@ namespace StartOptions.Demo
                 case "a":
                     this.RunAddNumbers(selectedGroup);
                     break;
+                case "s":
+                    this.RunSumUpNumbers(selectedGroup);
+                    break;
             }
         }
 
@@ -76,6 +79,19 @@ namespace StartOptions.Demo
             }
         }
 
+        private void RunSumUpNumbers(StartOptionGroup group)
+        {
+            double[] values = group.GetValue<object[]>().Cast<double>().ToArray();
+            if(values?.Length > 1)
+            {
+                Console.WriteLine($"{String.Join(" + ", values)} = {values.Sum()}");
+            }
+            else
+            {
+                Console.WriteLine("Please provide at least two values to be summed up");
+            }
+        }
+
         protected override ApplicationStartOptions GetApplicationStartOptions()
         {
             return new ApplicationStartOptions(this.GetStartOptionGroups(), this.GetGrouplessStartOptions(),
@@ -92,7 +108,9 @@ namespace StartOptions.Demo
                 new StartOptionGroupBuilder("add", "a").SetDescription("Adds two integers together")
                     .AddOption("value-1", "1", (_option) => _option.SetDescription("First value").SetValueType(StartOptionValueType.Single).SetValueParser(new Int32OptionValueParser()).SetRequired())
                     .AddOption("value-2", "2", (_option) => _option.SetDescription("Second value").SetValueType(StartOptionValueType.Single).SetValueParser(new Int32OptionValueParser()).SetRequired())
-                    .Build()
+                    .Build(),
+                new StartOptionGroupBuilder("sum", "s").SetDescription("Sums up multiple values")
+                    .SetValueParser(new DoubleOptionValueParser()).SetValueType(StartOptionValueType.Multiple).Build()
             };
         }
 

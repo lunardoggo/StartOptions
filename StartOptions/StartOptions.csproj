@@ -22,7 +22,7 @@
 	<VersionPrefix>1.1.0-preview.20220513</VersionPrefix>
 	<PackageVersion>1.1.0-preview.20220513</PackageVersion>
     <AssemblyVersion>1.1.0</AssemblyVersion>
-	<PackageReleaseNotes>Added start option parsing with attributes; note: the new parts of the library may contain undiscovered major bugs</PackageReleaseNotes>
+	<PackageReleaseNotes>Added possibility for start option groups to have values; note: the new parts of the library may contain undiscovered major bugs</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

@@ -153,8 +153,10 @@ namespace LunarDoggo.StartOptions.Reflection
 
             foreach (ParameterInfo parameter in constructor.GetParameters())
             {
+                StartOptionGroupValueAttribute groupAttribute = parameter.GetCustomAttribute<StartOptionGroupValueAttribute>();
                 StartOptionAttribute optionAttribute = parameter.GetCustomAttribute<StartOptionAttribute>();
-                if (optionAttribute == null && this.dependencyProvider == null)
+
+                if (optionAttribute == null && groupAttribute == null && this.dependencyProvider == null)
                 {
                     throw new InvalidOperationException("All constructor parameters must be decorated with the StartOptionAttribute unless a IDependencyProvider is provided");
                 }

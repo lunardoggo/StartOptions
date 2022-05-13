@@ -50,7 +50,7 @@ namespace StartOptions.Demo
 
         protected override Type[] GetCommandTypes()
         {
-            return new[] { typeof(AddCommand), typeof(ReadFileCommand) };
+            return new[] { typeof(AddCommand), typeof(ReadFileCommand), typeof(SumCommand) };
         }
     }
 }
