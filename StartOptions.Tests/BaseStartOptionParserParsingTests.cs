@@ -40,12 +40,12 @@ namespace StartOptions.Tests
             List<StartOptionGroup> groups = new List<StartOptionGroup>();
 
             StartOptionGroup first = new StartOptionGroupBuilder("export", "e").SetDescription("Exports an user to a file")
-                .AddOption("path", "p", (_builder) => _builder.SetDescription("Output file path").SetRequired().SetValueType(StartOptionValueType.Single))
-                .AddOption("user", "u", (_builder) => _builder.SetDescription("User to export").SetRequired().SetValueType(StartOptionValueType.Single))
+                .AddOption("path", "p", (_builder) => _builder.SetDescription("Output file path").SetMandatory().SetValueType(StartOptionValueType.Single))
+                .AddOption("user", "u", (_builder) => _builder.SetDescription("User to export").SetMandatory().SetValueType(StartOptionValueType.Single))
                 .Build();
 
             StartOptionGroup second = new StartOptionGroupBuilder("import", "i").SetDescription("Imports an user from a file")
-                .AddOption("path", "p", (_builder) => _builder.SetDescription("Input file path").SetRequired().SetValueType(StartOptionValueType.Single))
+                .AddOption("path", "p", (_builder) => _builder.SetDescription("Input file path").SetMandatory().SetValueType(StartOptionValueType.Single))
                 .AddOption("force", "f", (_builder) => _builder.SetDescription("Force a pre-existing user record to be overwritten"))
                 .Build();
 

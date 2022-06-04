@@ -172,15 +172,15 @@ namespace StartOptions.Tests
                 new StartOptionGroupBuilder("group", "g")
                     .SetValueParser(groupValueParser)
                     .SetValueType(groupValueType)
-                    .AddOption("groupOptional", "go", _builder => _builder.SetRequired(false))
-                    .AddOption("groupRequired", "gr", _builder => _builder.SetRequired(true))
+                    .AddOption("groupOptional", "go", _builder => _builder.SetMandatory(false))
+                    .AddOption("groupRequired", "gr", _builder => _builder.SetMandatory(true))
                     .Build()
             };
 
             StartOption[] grouplessOptions = new StartOption[]
             {
-                new StartOptionBuilder("optional", "o").SetRequired(false).Build(),
-                new StartOptionBuilder("required", "r").SetRequired(true).Build()
+                new StartOptionBuilder("optional", "o").SetMandatory(false).Build(),
+                new StartOptionBuilder("required", "r").SetMandatory(true).Build()
             };
 
             StartOptionParserSettings settings = new StartOptionParserSettings()

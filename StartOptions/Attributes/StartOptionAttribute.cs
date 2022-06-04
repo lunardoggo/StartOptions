@@ -35,7 +35,15 @@ namespace LunarDoggo.StartOptions
         /// it will always have to be set by users, if you set it to true. If it is part of a <see cref="StartOptionGroup"/>
         /// it is only required if the group is selected by the user
         /// </summary>
-        public bool Mandatory { get; set; } = false;
+        public bool IsMandatory { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets whether the <see cref="StartOption"/> has to be set. If this <see cref="StartOption"/> is groupless,
+        /// it will always have to be set by users, if you set it to true. If it is part of a <see cref="StartOptionGroup"/>
+        /// it is only required if the group is selected by the user
+        /// </summary>
+        [Obsolete("Mandatory will be removed in a future version, use IsMandatory instead")]
+        public bool Mandatory { get => this.IsMandatory; set => this.IsMandatory = value; }
 
         /// <summary>
         /// Returns the short name of the <see cref="StartOption"/>

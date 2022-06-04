@@ -19,7 +19,7 @@ namespace StartOptions.Tests
             Assert.Equal("long", option.LongName);
             Assert.Null(option.Description);
 
-            Assert.False(option.IsRequired);
+            Assert.False(option.IsMandatory);
             Assert.False(option.HasValue);
         }
 
@@ -29,7 +29,7 @@ namespace StartOptions.Tests
             StartOptionBuilder builder = new StartOptionBuilder("long", "s")
                 .SetValueType(StartOptionValueType.Single)
                 .SetDescription("description")
-                .SetRequired();
+                .SetMandatory();
 
             StartOption option = builder.Build();
 
@@ -38,7 +38,7 @@ namespace StartOptions.Tests
             Assert.Equal("s", option.ShortName);
             Assert.Equal("long", option.LongName);
 
-            Assert.True(option.IsRequired);
+            Assert.True(option.IsMandatory);
 
             Assert.False(option.HasValue);
         }

@@ -72,7 +72,7 @@ namespace LunarDoggo.StartOptions.HelpPages
                 this.AppendIndentedLine(builder, indentation, line);
                 this.AppendIndentedLine(builder, indentation + 1, option.Description);
                 this.AppendIndentedLine(builder, indentation, "type: start option");
-                this.AppendIndentedLine(builder, indentation + 1, $"required: {option.IsRequired}");
+                this.AppendIndentedLine(builder, indentation + 1, $"required: {option.IsMandatory}");
                 this.AppendIndentedLine(builder, indentation + 1, $"value type: {option.ValueType}");
                 builder.AppendLine();
             }
@@ -85,7 +85,7 @@ namespace LunarDoggo.StartOptions.HelpPages
                 return String.Empty;
             }
             string name = option.LongName.ToLower();
-            string valueFormat = option.IsRequired ? "<{0}>" : "[<{0}>]";
+            string valueFormat = option.IsMandatory ? "<{0}>" : "[<{0}>]";
 
             
             if (option.ValueType == StartOptionValueType.Single)

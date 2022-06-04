@@ -14,7 +14,7 @@ namespace LunarDoggo.StartOptions.Reflection
         public bool Equals(StartOption x, StartOption y)
         {
             return x == null && y == null ||
-                   x.IsRequired == y.IsRequired
+                   x.IsMandatory == y.IsMandatory
                 && x.LongName.Equals(y.LongName)
                 && x.ShortName.Equals(y.ShortName)
                 && x.Description.Equals(y.Description)
@@ -32,7 +32,7 @@ namespace LunarDoggo.StartOptions.Reflection
             unchecked
             {
                 return option.LongName.GetHashCode() * option.ShortName.GetHashCode() * option.Description.GetHashCode()
-                     * option.IsRequired.GetHashCode() * option.ValueType.GetHashCode() * (option.ParserType?.FullName ?? String.Empty).GetHashCode();
+                     * option.IsMandatory.GetHashCode() * option.ValueType.GetHashCode() * (option.ParserType?.FullName ?? String.Empty).GetHashCode();
             }
         }
     }

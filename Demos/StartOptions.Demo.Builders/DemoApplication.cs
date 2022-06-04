@@ -103,11 +103,11 @@ namespace StartOptions.Demo
             return new[]
             {
                 new StartOptionGroupBuilder("read", "r").SetDescription("Reads the specified file to the console")
-                    .AddOption("path", "p", (_option) => _option.SetDescription("Path to the file").SetValueType(StartOptionValueType.Single).SetRequired())
+                    .AddOption("path", "p", (_option) => _option.SetDescription("Path to the file").SetValueType(StartOptionValueType.Single).SetMandatory())
                     .Build(),
                 new StartOptionGroupBuilder("add", "a").SetDescription("Adds two integers together")
-                    .AddOption("value-1", "1", (_option) => _option.SetDescription("First value").SetValueType(StartOptionValueType.Single).SetValueParser(new Int32OptionValueParser()).SetRequired())
-                    .AddOption("value-2", "2", (_option) => _option.SetDescription("Second value").SetValueType(StartOptionValueType.Single).SetValueParser(new Int32OptionValueParser()).SetRequired())
+                    .AddOption("value-1", "1", (_option) => _option.SetDescription("First value").SetValueType(StartOptionValueType.Single).SetValueParser(new Int32OptionValueParser()).SetMandatory())
+                    .AddOption("value-2", "2", (_option) => _option.SetDescription("Second value").SetValueType(StartOptionValueType.Single).SetValueParser(new Int32OptionValueParser()).SetMandatory())
                     .Build(),
                 new StartOptionGroupBuilder("sum", "s").SetDescription("Sums up multiple values")
                     .SetValueParser(new DoubleOptionValueParser()).SetValueType(StartOptionValueType.Multiple).Build()

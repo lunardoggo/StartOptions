@@ -27,7 +27,7 @@ namespace StartOptions.Tests
             {
                 new StartOptionGroupBuilder("group", "g")
                     .SetDescription("The only available start option group")
-                    .AddOption("option", "o", (_builder) => _builder.SetDescription("Option of the group").SetRequired())
+                    .AddOption("option", "o", (_builder) => _builder.SetDescription("Option of the group").SetMandatory())
                     .Build()
             };
         }
@@ -56,26 +56,26 @@ namespace StartOptions.Tests
             {
                 new StartOptionGroupBuilder("import", "i")
                     .SetDescription("Imports a file to a database table")
-                    .AddOption("path", "p", (_builder) => _builder.SetDescription("Path to the imported file").SetValueType(StartOptionValueType.Single).SetRequired())
-                    .AddOption("table", "t", (_builder) => _builder.SetDescription("Name of the table").SetValueType(StartOptionValueType.Single).SetRequired())
+                    .AddOption("path", "p", (_builder) => _builder.SetDescription("Path to the imported file").SetValueType(StartOptionValueType.Single).SetMandatory())
+                    .AddOption("table", "t", (_builder) => _builder.SetDescription("Name of the table").SetValueType(StartOptionValueType.Single).SetMandatory())
                     .AddOption("force", "f", (_builder) => _builder.SetDescription("Overwrite already existing records in the table"))
                     .Build(),
                 new StartOptionGroupBuilder("export", "e")
                     .SetDescription("Exports a database table to a file")
-                    .AddOption("path", "p", (_builder) => _builder.SetDescription("Path to the exported file").SetValueType(StartOptionValueType.Single).SetRequired())
-                    .AddOption("table", "t", (_builder) => _builder.SetDescription("Name of the table").SetValueType(StartOptionValueType.Single).SetRequired())
+                    .AddOption("path", "p", (_builder) => _builder.SetDescription("Path to the exported file").SetValueType(StartOptionValueType.Single).SetMandatory())
+                    .AddOption("table", "t", (_builder) => _builder.SetDescription("Name of the table").SetValueType(StartOptionValueType.Single).SetMandatory())
                     .Build(),
                 new StartOptionGroupBuilder("show-records", "r")
                     .SetDescription("Shows all records in the specified table")
-                    .AddOption("table", "t", (_builder) => _builder.SetDescription("Name of the table").SetValueType(StartOptionValueType.Single).SetRequired())
+                    .AddOption("table", "t", (_builder) => _builder.SetDescription("Name of the table").SetValueType(StartOptionValueType.Single).SetMandatory())
                     .Build(),
                 new StartOptionGroupBuilder("clear-records", "c")
                     .SetDescription("Clears all records from the specified table")
-                    .AddOption("table", "t", (_builder) => _builder.SetDescription("Name of the table").SetValueType(StartOptionValueType.Single).SetRequired())
+                    .AddOption("table", "t", (_builder) => _builder.SetDescription("Name of the table").SetValueType(StartOptionValueType.Single).SetMandatory())
                     .Build(),
                 new StartOptionGroupBuilder("drop-table", "d")
                     .SetDescription("Drops the table with the specified name")
-                    .AddOption("table", "t", (_builder) => _builder.SetDescription("Name of the table").SetValueType(StartOptionValueType.Single).SetRequired())
+                    .AddOption("table", "t", (_builder) => _builder.SetDescription("Name of the table").SetValueType(StartOptionValueType.Single).SetMandatory())
                     .Build(),
                 new StartOptionGroupBuilder("list", "l")
                     .SetDescription("Lists all tables in the database")
@@ -88,8 +88,8 @@ namespace StartOptions.Tests
             return new[]
             {
                 new StartOptionBuilder("port", "po").SetDescription("Port of the sql server").SetValueType(StartOptionValueType.Single).SetValueParser(new Int32OptionValueParser()).Build(),
-                new StartOptionBuilder("server", "srv").SetDescription("Address of the sql server").SetValueType(StartOptionValueType.Single).SetRequired().Build(),
-                new StartOptionBuilder("username", "u").SetDescription("Name of the database user").SetValueType(StartOptionValueType.Single).SetRequired().Build(),
+                new StartOptionBuilder("server", "srv").SetDescription("Address of the sql server").SetValueType(StartOptionValueType.Single).SetMandatory().Build(),
+                new StartOptionBuilder("username", "u").SetDescription("Name of the database user").SetValueType(StartOptionValueType.Single).SetMandatory().Build(),
                 new StartOptionBuilder("password", "pass").SetDescription("Password of the database user").SetValueType(StartOptionValueType.Single).Build(),
                 new StartOptionBuilder("schema", "s").SetDescription("Name of the sql schema").SetValueType(StartOptionValueType.Single).Build(),
                 new StartOptionBuilder("verbose", "v").SetDescription("Enable verbose output").Build()

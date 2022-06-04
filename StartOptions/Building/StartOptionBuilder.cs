@@ -1,4 +1,5 @@
 ﻿using LunarDoggo.StartOptions.Parsing.Values;
+using System;
 
 namespace LunarDoggo.StartOptions.Building
 {
@@ -7,7 +8,7 @@ namespace LunarDoggo.StartOptions.Building
         private IStartOptionValueParser valueParser;
         private StartOptionValueType valueType;
         private string description;
-        private bool required;
+        private bool mandatory;
 
         /// <summary>
         /// Creates a new builder for a <see cref="StartOption"/> with the provided long and short name
@@ -49,9 +50,20 @@ namespace LunarDoggo.StartOptions.Building
         /// it will always have to be set by users, if you set it to true. If it is part of a <see cref="StartOptionGroup"/>
         /// it is only required if the group is selected by the user
         /// </summary>
+        [Obsolete("SetRequired(bool required) will be removed in a future version, use SetMandatory(bool mandatory) instead")]
         public StartOptionBuilder SetRequired(bool required = true)
         {
-            this.required = required;
+            return this.SetMandatory(required);
+        }
+
+        /// <summary>
+        /// Sets whether the <see cref="StartOption"/> has to be set. If this <see cref="StartOption"/> is groupless,
+        /// it will always have to be set by users, if you set it to true. If it is part of a <see cref="StartOptionGroup"/>
+        /// it is only required if the group is selected by the user
+        /// </summary>
+        public StartOptionBuilder SetMandatory(bool mandatory = true)
+        {
+            this.mandatory = mandatory;
             return this;
         }
 
@@ -60,7 +72,7 @@ namespace LunarDoggo.StartOptions.Building
         /// </summary>
         public override StartOption Build()
         {
-            return new StartOption(this.longName, this.shortName, this.description, this.valueParser, this.valueType, this.required);
+            return new StartOption(this.longName, this.shortName, this.description, this.valueParser, this.valueType, this.mandatory);
         }
     }
 }

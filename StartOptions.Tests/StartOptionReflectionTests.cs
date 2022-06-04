@@ -100,7 +100,7 @@ namespace StartOptions.Tests
             Assert.Equal(longName, option.LongName);
             Assert.Equal(shortName, option.ShortName);
             Assert.Equal(description, option.Description);
-            Assert.Equal(mandatory, option.IsRequired);
+            Assert.Equal(mandatory, option.IsMandatory);
             Assert.Equal(valueType, option.ValueType);
         }
 

@@ -75,7 +75,7 @@ namespace LunarDoggo.StartOptions.Parsing
         private string[] GetMissingRequiredOptions(IEnumerable<StartOption> parsedOptions, IEnumerable<StartOption> availableOptions)
         {
             List<string> missing = new List<string>();
-            foreach (StartOption option in availableOptions.Where(_option => _option.IsRequired))
+            foreach (StartOption option in availableOptions.Where(_option => _option.IsMandatory))
             {
                 if (parsedOptions.SingleOrDefault(_parsed => _parsed.LongName.Equals(option.LongName)) is null)
                 {
