@@ -1,5 +1,6 @@
 ﻿using LunarDoggo.StartOptions.Parsing;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LunarDoggo.StartOptions
 {
@@ -23,7 +24,7 @@ namespace LunarDoggo.StartOptions
                                                              this.options.GrouplessStartOptions, this.options.HelpOptions);
             ParsedStartOptions parsed = parser.Parse(args);
 
-            if(parsed.WasHelpRequested)
+            if (parsed.WasHelpRequested)
             {
                 this.PrintHelpPage(parsed);
             }
@@ -38,10 +39,18 @@ namespace LunarDoggo.StartOptions
         /// </summary>
         protected virtual void PrintHelpPage(ParsedStartOptions parsed)
         {
-            IEnumerable<StartOptionGroup> groups = parsed.ParsedOptionGroup == null
-                    ? this.options.StartOptionGroups : new[] { parsed.ParsedOptionGroup };
-            IEnumerable<StartOption> options = parsed.ParsedGrouplessOptions ?? this.options.GrouplessStartOptions;
-
+            IEnumerable<StartOption> options = parsed.ParsedOptionGroup != null
+                    ? parsed.ParsedGrouplessOptions : this.options.GrouplessStartOptions;
+            IEnumerable<StartOptionGroup> groups = null;
+            if (parsed.ParsedOptionGroup == null)
+            {
+                groups = parsed.ParsedGrouplessOptions?.Count() > 0 ? new StartOptionGroup[0] : this.options.StartOptionGroups;
+            }
+            else
+            {
+                groups = new[] { this.options.StartOptionGroups.Single(_grp => _grp.LongName.Equals(parsed.ParsedOptionGroup.LongName)) };
+            }
+            
             this.PrintHelpPage(this.options.StartOptionParserSettings, this.options.HelpOptions, groups, options);
         }
 
@@ -60,7 +69,7 @@ namespace LunarDoggo.StartOptions
         protected abstract ApplicationStartOptions GetApplicationStartOptions();
     }
 
-    public class ApplicationStartOptions
+    public class ApplicationStartOptions : IClonable<ApplicationStartOptions>
     {
         public ApplicationStartOptions(IEnumerable<StartOptionGroup> groups, IEnumerable<StartOption> grouplessOptions, IEnumerable<HelpOption> helpOptions, StartOptionParserSettings parserSettings)
         {
@@ -94,5 +103,14 @@ namespace LunarDoggo.StartOptions
         /// Returns all <see cref="HelpOption"/>s the application supports
         /// </summary>
         public IEnumerable<HelpOption> HelpOptions { get; }
+
+        public ApplicationStartOptions Clone()
+        {
+            IEnumerable<StartOption> grouplessOptions = this.GrouplessStartOptions?.ToArray() ?? new StartOption[0];
+            IEnumerable<StartOptionGroup> groups = this.StartOptionGroups?.ToArray() ?? new StartOptionGroup[0];
+            IEnumerable<HelpOption> helpOptions = this.HelpOptions?.ToArray() ?? new HelpOption[0];
+
+            return new ApplicationStartOptions(groups, grouplessOptions, helpOptions, this.StartOptionParserSettings.Clone());
+        }
     }
 }

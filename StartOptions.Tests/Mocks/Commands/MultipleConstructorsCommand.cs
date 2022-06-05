@@ -10,19 +10,19 @@ namespace StartOptions.Tests.Mocks.Commands
 
         [StartOptionGroup("list", "l", Description = "Lists strings stored in the list")]
         public MultipleConstructorsCommand([StartOption("inLine", "i", Description = "Displays the items in a line instead of seperate lines")] bool inLine,
-                                           [StartOption("verbose", "vb", Description = "Enable verbose output", IsGrouplessOption = true)] bool verbose)
+                                           [GrouplessStartOption("verbose", "vb", Description = "Enable verbose output")] bool verbose)
         {
             this.action = () => throw new ListException();
         }
 
         [StartOptionGroup("add", "a", Description = "Adds a new value to the stored list")]
-        public MultipleConstructorsCommand([StartOption("value", "v", Description = "Value to be added", Mandatory = true, ValueType = StartOptionValueType.Single)] string value)
+        public MultipleConstructorsCommand([StartOption("value", "v", Description = "Value to be added", IsMandatory = true, ValueType = StartOptionValueType.Single)] string value)
         {
             this.action = () => throw new AddException();
         }
 
         [StartOptionGroup("remove", "r", Description = "Removes a value from the stored list")]
-        public MultipleConstructorsCommand([StartOption("value", "v", Description = "Value to be added", Mandatory = true, ValueType = StartOptionValueType.Single)] string value,
+        public MultipleConstructorsCommand([StartOption("value", "v", Description = "Value to be added", IsMandatory = true, ValueType = StartOptionValueType.Single)] string value,
                                            [StartOption("ignoreErrors", "i", Description = "Ignores the error if the value is not present in the list")] bool ignoreErrors)
         {
             this.action = () =>

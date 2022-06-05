@@ -9,7 +9,8 @@ namespace StartOptions.Demo
 {
     public class DemoApplication : CommandApplication
     {
-        private readonly IHelpPagePrinter helpPrinter = new ConsoleHelpPrinter('\t');
+        private const string appDescription = "This app is intended as a demonstration of the attribute based workflow with the LunarDoggo.StartOptions library.";
+        private readonly IHelpPagePrinter helpPrinter = new ConsoleHelpPrinter('\t', appDescription);
 
         protected override void PrintHelpPage(StartOptionParserSettings settings, IEnumerable<HelpOption> helpOptions, IEnumerable<StartOptionGroup> groups, IEnumerable<StartOption> grouplessOptions)
         {

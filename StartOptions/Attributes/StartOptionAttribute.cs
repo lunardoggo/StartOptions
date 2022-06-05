@@ -23,10 +23,6 @@ namespace LunarDoggo.StartOptions
         /// </summary>
         public string Description { get; set; } = String.Empty;
         /// <summary>
-        /// Gets or sets whether the <see cref="StartOption"/> is groupless (true) or is part of a <see cref="StartOptionGroup"/> (false)
-        /// </summary>
-        public bool IsGrouplessOption { get; set; } = false;
-        /// <summary>
         /// Gets or sets the <see cref="Type"/> of the <see cref="IStartOptionValueParser"/> for the <see cref="StartOption"/>
         /// </summary>
         public Type ParserType { get; set; } = null;

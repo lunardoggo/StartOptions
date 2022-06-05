@@ -67,12 +67,12 @@ namespace StartOptions.Tests
         public void TestInstantiateWithoutGroup()
         {
             ReflectionHelper helper = this.GetDefaultReflectionHelper(false);
-            ParsedStartOptions parsedOptions = this.GetParsedStartOptions(helper, typeof(BasicMockCommand), new string[] { "-vb" });
+            ParsedStartOptions parsedOptions = this.GetParsedStartOptions(helper, new string[] { "-vb" }, typeof(BasicMockCommand));
 
             Assert.Null(helper.Instantiate(parsedOptions));
 
             helper = this.GetDefaultReflectionHelper(true);
-            Assert.Throws<OptionRequirementException>(() => this.GetParsedStartOptions(helper, typeof(BasicMockCommand), new string[] { "-vb" }));
+            Assert.Throws<OptionRequirementException>(() => this.GetParsedStartOptions(helper, new string[] { "-vb" }, typeof(BasicMockCommand)));
         }
 
         [Fact]
@@ -80,13 +80,13 @@ namespace StartOptions.Tests
         {
             ReflectionHelper helper = this.GetDefaultReflectionHelper(false);
 
-            ParsedStartOptions parsedOptions = this.GetParsedStartOptions(helper, typeof(MultipleConstructorsCommand), new string[] { "-l" });
+            ParsedStartOptions parsedOptions = this.GetParsedStartOptions(helper, new string[] { "-l" }, typeof(MultipleConstructorsCommand));
             Assert.Throws<ListException>(() => helper.Instantiate(parsedOptions).Execute());
 
-            parsedOptions = this.GetParsedStartOptions(helper, typeof(MultipleConstructorsCommand), new string[] { "-a", "-v=s4" });
+            parsedOptions = this.GetParsedStartOptions(helper, new string[] { "-a", "-v=s4" }, typeof(MultipleConstructorsCommand));
             Assert.Throws<AddException>(() => helper.Instantiate(parsedOptions).Execute());
 
-            parsedOptions = this.GetParsedStartOptions(helper, typeof(MultipleConstructorsCommand), new string[] { "-r", "-v=s3" });
+            parsedOptions = this.GetParsedStartOptions(helper, new string[] { "-r", "-v=s3" }, typeof(MultipleConstructorsCommand));
             Assert.Throws<RemoveException>(() => helper.Instantiate(parsedOptions).Execute());
         }
 
@@ -94,7 +94,7 @@ namespace StartOptions.Tests
         public void TestInstantiationWithDependencyResolver()
         {
             ReflectionHelper helper = this.GetReflectionHelperWithDependencies(false);
-            ParsedStartOptions parsedOptions = this.GetParsedStartOptions(helper, typeof(DependencyProviderCommand), new string[] { "-a", "-u=user.name", "-d=User Name" });
+            ParsedStartOptions parsedOptions = this.GetParsedStartOptions(helper, new string[] { "-a", "-u=user.name", "-d=User Name" }, typeof(DependencyProviderCommand));
 
             IApplicationCommand command = helper.Instantiate(parsedOptions);
             Assert.NotNull(command);
@@ -105,12 +105,12 @@ namespace StartOptions.Tests
         public void TestInstantiationWithMissingDependencies()
         {
             ReflectionHelper helper = this.GetReflectionHelperWithDependencies(true);
-            ParsedStartOptions parsedOptions = this.GetParsedStartOptions(helper, typeof(UnrelatedConstructorParameterCommand), new string[] { "-g", "-o=abc" });
+            ParsedStartOptions parsedOptions = this.GetParsedStartOptions(helper, new string[] { "-g", "-o=abc" }, typeof(UnrelatedConstructorParameterCommand));
 
             Assert.Throws<KeyNotFoundException>(() => helper.Instantiate(parsedOptions));
             
             helper = this.GetReflectionHelperWithDependencies(false);
-            parsedOptions = this.GetParsedStartOptions(helper, typeof(UnrelatedConstructorParameterCommand), new string[] { "-g", "-o=abc" });
+            parsedOptions = this.GetParsedStartOptions(helper, new string[] { "-g", "-o=abc" }, typeof(UnrelatedConstructorParameterCommand));
             Assert.IsType<UnrelatedConstructorParameterCommand>(helper.Instantiate(parsedOptions));
         }
 
@@ -118,7 +118,7 @@ namespace StartOptions.Tests
         public void TestInstantiateWithGroupValues()
         {
             ReflectionHelper helper = this.GetReflectionHelperWithDependencies(true);
-            ParsedStartOptions parsedOptions = this.GetParsedStartOptions(helper, typeof(GroupValueCommand), new string[] { "-s=1,2,3,4" });
+            ParsedStartOptions parsedOptions = this.GetParsedStartOptions(helper, new string[] { "-s=1,2,3,4" }, typeof(GroupValueCommand));
 
             GroupValueCommand command = helper.Instantiate(parsedOptions) as GroupValueCommand;
             Assert.NotNull(command);
@@ -126,15 +126,30 @@ namespace StartOptions.Tests
             Assert.Equal(4, command.Values.Length);
         }
 
+        [Fact]
+        public void TestInstantiateGrouplessOptionReference()
+        {
+            ReflectionHelper helper = this.GetReflectionHelperWithDependencies(true);
+            ParsedStartOptions firstParsedOptions = this.GetParsedStartOptions(helper, new string[] { "-grp", "-vb" }, typeof(BasicMockCommand), typeof(GrouplessOptionReferenceCommand));
+
+            GrouplessOptionReferenceCommand firstCommand = helper.Instantiate(firstParsedOptions) as GrouplessOptionReferenceCommand;
+            Assert.True(firstCommand.Verbose);
+
+            ParsedStartOptions secondParsedOptions = this.GetParsedStartOptions(helper, new string[] { "-grp" }, typeof(BasicMockCommand), typeof(GrouplessOptionReferenceCommand));
+
+            GrouplessOptionReferenceCommand secondCommand = helper.Instantiate(secondParsedOptions) as GrouplessOptionReferenceCommand;
+            Assert.False(secondCommand.Verbose);
+        }
+
         private Tuple<ReflectionHelper, ParsedStartOptions> GetHelperOptionsTuple(bool requireGroup, Type commandType, string[] args)
         {
             ReflectionHelper helper = this.GetDefaultReflectionHelper(requireGroup);
-            ParsedStartOptions options = this.GetParsedStartOptions(helper, commandType, args);
+            ParsedStartOptions options = this.GetParsedStartOptions(helper, args, commandType);
 
             return new Tuple<ReflectionHelper, ParsedStartOptions>(helper, options);
         }
 
-        private ParsedStartOptions GetParsedStartOptions(ReflectionHelper helper, Type commandType, string[] args)
+        private ParsedStartOptions GetParsedStartOptions(ReflectionHelper helper, string[] args, params Type[] commandType)
         {
             ApplicationStartOptions options = helper.GetStartOptions(commandType);
 

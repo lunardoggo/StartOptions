@@ -8,19 +8,30 @@ namespace LunarDoggo.StartOptions.HelpPages
 {
     public class ConsoleHelpPrinter : IHelpPagePrinter
     {
-        private readonly char indentationChar;
+        protected readonly string applicationDescription;
+        protected readonly char indentationChar;
 
-        public ConsoleHelpPrinter(char indentationChar)
+        public ConsoleHelpPrinter(char indentationChar, string applicationDescription)
         {
+            this.applicationDescription = applicationDescription;
             this.indentationChar = indentationChar;
         }
+
+        public ConsoleHelpPrinter(char indentationChar) : this(indentationChar, null)
+        { }
 
         /// <summary>
         /// Prints the help page to the console according to the provided parameters
         /// </summary>
-        public void Print(StartOptionParserSettings settings, IEnumerable<HelpOption> helpOptions, IEnumerable<StartOptionGroup> groups, IEnumerable<StartOption> grouplessOptions)
+        public virtual void Print(StartOptionParserSettings settings, IEnumerable<HelpOption> helpOptions, IEnumerable<StartOptionGroup> groups, IEnumerable<StartOption> grouplessOptions)
         {
             StringBuilder builder = new StringBuilder();
+
+            if (!String.IsNullOrWhiteSpace(this.applicationDescription))
+            {
+                builder.AppendLine(this.applicationDescription);
+                builder.AppendLine();
+            }
 
             this.AppendHelpOptions(builder, settings, helpOptions);
             this.AppendGroups(builder, settings, groups);
@@ -29,14 +40,14 @@ namespace LunarDoggo.StartOptions.HelpPages
             Console.WriteLine(builder.ToString());
         }
 
-        private void AppendHelpOptions(StringBuilder builder, StartOptionParserSettings settings, IEnumerable<HelpOption> helpOptions)
+        protected void AppendHelpOptions(StringBuilder builder, StartOptionParserSettings settings, IEnumerable<HelpOption> helpOptions)
         {
             builder.Append("Available help options: ");
             builder.AppendLine(String.Join(",", helpOptions.Select(_option => this.GetHelpOptionName(settings, _option))));
             builder.AppendLine();
         }
 
-        private string GetHelpOptionName(StartOptionParserSettings settings, HelpOption option)
+        protected string GetHelpOptionName(StartOptionParserSettings settings, HelpOption option)
         {
             string prefix;
             if (option.IsShortName)
@@ -49,36 +60,38 @@ namespace LunarDoggo.StartOptions.HelpPages
             }
             return prefix + option.Name;
         }
-
-        private void AppendGroups(StringBuilder builder, StartOptionParserSettings settings, IEnumerable<StartOptionGroup> groups)
+        
+        protected void AppendGroups(StringBuilder builder, StartOptionParserSettings settings, IEnumerable<StartOptionGroup> groups)
         {
             foreach (StartOptionGroup group in groups)
             {
                 this.AppendIndentedLine(builder, 0, $"{settings.LongOptionNamePrefix}{group.LongName} | {settings.ShortOptionNamePrefix}{group.ShortName} (group)");
                 this.AppendIndentedLine(builder, 1, group.Description);
-                this.AppendIndentedLine(builder, 1, "type: start option group");
+                if (group.ValueType != StartOptionValueType.Switch)
+                {
+                    this.AppendIndentedLine(builder, 1, $"value type: {group.ValueType}");
+                }
                 builder.AppendLine();
                 this.AppendOptions(builder, settings, group.Options, 1);
                 builder.AppendLine();
             }
         }
 
-        private void AppendOptions(StringBuilder builder, StartOptionParserSettings settings, IEnumerable<StartOption> options, int indentation)
+        protected void AppendOptions(StringBuilder builder, StartOptionParserSettings settings, IEnumerable<StartOption> options, int indentation)
         {
             foreach (StartOption option in options)
             {
                 string valueIndicator = this.GetOptionValueIndicator(option, settings);
-                string line = $"{settings.LongOptionNamePrefix}{option.LongName}{valueIndicator} | {settings.ShortOptionNamePrefix}{option.ShortName}{valueIndicator}";
+                string line = $"{settings.LongOptionNamePrefix}{option.LongName}{valueIndicator} | {settings.ShortOptionNamePrefix}{option.ShortName}{valueIndicator} (option)";
                 this.AppendIndentedLine(builder, indentation, line);
                 this.AppendIndentedLine(builder, indentation + 1, option.Description);
-                this.AppendIndentedLine(builder, indentation, "type: start option");
-                this.AppendIndentedLine(builder, indentation + 1, $"required: {option.IsMandatory}");
+                this.AppendIndentedLine(builder, indentation + 1, $"mandatory: {option.IsMandatory}");
                 this.AppendIndentedLine(builder, indentation + 1, $"value type: {option.ValueType}");
                 builder.AppendLine();
             }
         }
 
-        private string GetOptionValueIndicator(StartOption option, StartOptionParserSettings settings)
+        protected string GetOptionValueIndicator(StartOption option, StartOptionParserSettings settings)
         {
             if (option.ValueType == StartOptionValueType.Switch)
             {
@@ -99,7 +112,7 @@ namespace LunarDoggo.StartOptions.HelpPages
             }
         }
 
-        private void AppendIndentedLine(StringBuilder builder, int indentation, string message)
+        protected void AppendIndentedLine(StringBuilder builder, int indentation, string message)
         {
             for (int i = 0; i < indentation; i++)
             {

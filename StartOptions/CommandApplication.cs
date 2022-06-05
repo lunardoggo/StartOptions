@@ -21,7 +21,7 @@ namespace LunarDoggo.StartOptions
 
         protected override void Run(StartOptionGroup selectedGroup, IEnumerable<StartOption> selectedGrouplessOptions)
         {
-            IApplicationCommand command = this.helper.Instantiate(new ParsedStartOptions(selectedGroup, selectedGrouplessOptions, false));
+            IApplicationCommand command = this.helper.Instantiate(new ParsedStartOptions(base.options, selectedGroup, selectedGrouplessOptions, false));
             if(command == null)
             {
                 throw new NullReferenceException("Couldn't instantiate an IApplicationCommand with the provided parameters");

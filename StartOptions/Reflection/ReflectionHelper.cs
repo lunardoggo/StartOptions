@@ -48,18 +48,30 @@ namespace LunarDoggo.StartOptions.Reflection
 
             foreach (ParameterInfo parameter in parameters)
             {
+                GrouplessStartOptionReferenceAttribute referenceAttribute = parameter.GetCustomAttribute<GrouplessStartOptionReferenceAttribute>();
                 StartOptionGroupValueAttribute groupAttribute = parameter.GetCustomAttribute<StartOptionGroupValueAttribute>();
                 StartOptionAttribute optionAttribute = parameter.GetCustomAttribute<StartOptionAttribute>();
 
                 if (optionAttribute != null)
                 {
-                    StartOption option = allOptions.SingleOrDefault(_option => _option.LongName.Equals(optionAttribute.LongName));
+                    StartOption option = this.GetBaseStartOption(optionAttribute.LongName, allOptions) as StartOption;
                     values.Add(this.GetStartOptionConstructorParameterValue(parameter, optionAttribute.ValueType, option));
                 }
                 else if (groupAttribute != null)
                 {
                     StartOptionGroup group = options.ParsedOptionGroup;
                     values.Add(this.GetStartOptionConstructorParameterValue(parameter, group.ValueType, group));
+                }
+                else if (referenceAttribute != null)
+                {
+                    string name = referenceAttribute.AssociatedLongName;
+                    StartOption option = this.GetBaseStartOption(name, allOptions) as StartOption;
+                    StartOptionValueType? valueType = option?.ValueType;
+                    if (!valueType.HasValue)
+                    {
+                        valueType = (this.GetBaseStartOption(name, options.ApplicationStartOptions.GrouplessStartOptions) as StartOption).ValueType;
+                    }
+                    values.Add(this.GetStartOptionConstructorParameterValue(parameter, valueType.Value, option));
                 }
                 else if (this.dependencyProvider != null)
                 {
@@ -68,6 +80,11 @@ namespace LunarDoggo.StartOptions.Reflection
             }
 
             return values.ToArray();
+        }
+
+        private BaseStartOption GetBaseStartOption(string longName, IEnumerable<BaseStartOption> source)
+        {
+            return source.SingleOrDefault(_option => _option.LongName.Equals(longName));
         }
 
         private object GetStartOptionConstructorParameterValue(ParameterInfo parameter, StartOptionValueType attributeValueType, BaseStartOption option)
@@ -90,34 +107,36 @@ namespace LunarDoggo.StartOptions.Reflection
                 return false;
             }
 
-            return !parameter.ParameterType.GetTypeInfo().IsValueType ? null : Activator.CreateInstance(parameter.ParameterType);
+            return parameter.ParameterType.GetTypeInfo().IsValueType ? Activator.CreateInstance(parameter.ParameterType) : null;
         }
 
         /// <summary>
         /// Returns the <see cref="ApplicationStartOptions"/> from all constructors of the given types which
         /// are decorated with the <see cref="StartOptionGroupAttribute"/>
         /// </summary>
+        /// <exception cref="MissingStartOptionReferenceException"></exception>
         /// <exception cref="InvalidOperationException"></exception>
         /// <exception cref="NotSupportedException"></exception>
         /// <exception cref="NameConflictException"></exception>
         /// <exception cref="InvalidNameException"></exception>
         public ApplicationStartOptions GetStartOptions(params Type[] types)
         {
+            Dictionary<string, List<Type>> startOptionReferences = new Dictionary<string, List<Type>>();
             List<StartOptionGroup> groups = new List<StartOptionGroup>();
             List<StartOption> options = new List<StartOption>();
 
             foreach (Type type in types)
             {
                 this.ValidateTypeInfo(type, type.GetTypeInfo());
-                this.ProcessTypeOptions(type, ref groups, ref options);
+                this.ProcessTypeOptions(type, ref groups, ref options, ref startOptionReferences);
             }
 
             ApplicationStartOptions startOptions = new ApplicationStartOptions(groups, options.Distinct(StartOptionComparer.Instance), this.helpOptions, this.settings);
-            this.ValidateStartOptionNames(startOptions.StartOptionGroups, startOptions.GrouplessStartOptions);
+            this.ValidateStartOptionNames(startOptions.StartOptionGroups, startOptions.GrouplessStartOptions, startOptionReferences);
             return startOptions;
         }
 
-        private void ProcessTypeOptions(Type type, ref List<StartOptionGroup> groups, ref List<StartOption> options)
+        private void ProcessTypeOptions(Type type, ref List<StartOptionGroup> groups, ref List<StartOption> options, ref Dictionary<string, List<Type>> startOptionReferences)
         {
             List<StartOption> grouplessOptionCache = new List<StartOption>();
             List<StartOption> groupOptionCache = new List<StartOption>();
@@ -127,7 +146,7 @@ namespace LunarDoggo.StartOptions.Reflection
                 StartOptionGroupAttribute attribute = constructor.GetCustomAttribute<StartOptionGroupAttribute>();
                 if (attribute != null)
                 {
-                    ConstructorStartOptions constructorOptions = this.GetConstructorStartOptions(attribute, constructor, ref groupOptionCache, ref grouplessOptionCache);
+                    ConstructorStartOptions constructorOptions = this.GetConstructorStartOptions(attribute, constructor, ref groupOptionCache, ref grouplessOptionCache, ref startOptionReferences);
                     if (constructorOptions.Options.Any())
                     {
                         options.AddRange(constructorOptions.Options);
@@ -146,30 +165,44 @@ namespace LunarDoggo.StartOptions.Reflection
             return constructor.GetCustomAttribute<StartOptionGroupAttribute>(true) != null && constructor.IsPublic && !constructor.IsStatic;
         }
 
-        private ConstructorStartOptions GetConstructorStartOptions(StartOptionGroupAttribute attribute, ConstructorInfo constructor, ref List<StartOption> groupOptionCache, ref List<StartOption> grouplessOptionCache)
+        private ConstructorStartOptions GetConstructorStartOptions(StartOptionGroupAttribute attribute, ConstructorInfo constructor, ref List<StartOption> groupOptionCache,
+                                                                   ref List<StartOption> grouplessOptionCache, ref Dictionary<string, List<Type>> grouplessStartOptionReferences)
         {
             grouplessOptionCache.Clear();
             groupOptionCache.Clear();
 
             foreach (ParameterInfo parameter in constructor.GetParameters())
             {
+                GrouplessStartOptionReferenceAttribute referenceAttribute = parameter.GetCustomAttribute<GrouplessStartOptionReferenceAttribute>();
                 StartOptionGroupValueAttribute groupAttribute = parameter.GetCustomAttribute<StartOptionGroupValueAttribute>();
                 StartOptionAttribute optionAttribute = parameter.GetCustomAttribute<StartOptionAttribute>();
 
-                if (optionAttribute == null && groupAttribute == null && this.dependencyProvider == null)
+                if (referenceAttribute == null && optionAttribute == null && groupAttribute == null && this.dependencyProvider == null)
                 {
                     throw new InvalidOperationException("All constructor parameters must be decorated with the StartOptionAttribute unless a IDependencyProvider is provided");
                 }
                 else if (optionAttribute != null)
                 {
                     StartOption option = this.GetStartOption(optionAttribute);
-                    if (optionAttribute.IsGrouplessOption)
+                    if (optionAttribute is GrouplessStartOptionAttribute)
                     {
                         grouplessOptionCache.Add(option);
                     }
                     else
                     {
                         groupOptionCache.Add(option);
+                    }
+                }
+                else if (referenceAttribute != null)
+                {
+                    Type type = constructor.DeclaringType;
+                    if (!grouplessStartOptionReferences.ContainsKey(referenceAttribute.AssociatedLongName))
+                    {
+                        grouplessStartOptionReferences.Add(referenceAttribute.AssociatedLongName, new List<Type>());
+                    }
+                    if (!grouplessStartOptionReferences[referenceAttribute.AssociatedLongName].Contains(type))
+                    {
+                        grouplessStartOptionReferences[referenceAttribute.AssociatedLongName].Add(type);
                     }
                 }
             }
@@ -184,7 +217,7 @@ namespace LunarDoggo.StartOptions.Reflection
 
         private StartOption GetStartOption(StartOptionAttribute attribute)
         {
-            return new StartOption(attribute.LongName, attribute.ShortName, attribute.Description, StartOptionValueParserRegistry.GetParser(attribute.ParserType), attribute.ValueType, attribute.Mandatory);
+            return new StartOption(attribute.LongName, attribute.ShortName, attribute.Description, StartOptionValueParserRegistry.GetParser(attribute.ParserType), attribute.ValueType, attribute.IsMandatory);
         }
 
         private void ValidateTypeInfo(Type type, TypeInfo typeInfo)
@@ -203,9 +236,10 @@ namespace LunarDoggo.StartOptions.Reflection
             }
         }
 
-        private void ValidateStartOptionNames(IEnumerable<StartOptionGroup> groups, IEnumerable<StartOption> options)
+        private void ValidateStartOptionNames(IEnumerable<StartOptionGroup> groups, IEnumerable<StartOption> options, Dictionary<string, List<Type>> startOptionReferences)
         {
             StartOptionParserValidator validator = new StartOptionParserValidator(this.settings, groups, options, this.helpOptions);
+            validator.CheckAreGrouplessStartOptionReferencesValid(startOptionReferences);
             validator.CheckNameConflicts();
         }
 

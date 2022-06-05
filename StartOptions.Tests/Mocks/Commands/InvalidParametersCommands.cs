@@ -147,7 +147,7 @@ namespace StartOptions.Tests.Mocks.Commands
     public class GroupGrouplessOptionLongNameConflictCommand : IApplicationCommand
     {
         [StartOptionGroup("group", "g")]
-        public GroupGrouplessOptionLongNameConflictCommand([StartOption("group", "o", IsGrouplessOption = true)] string option)
+        public GroupGrouplessOptionLongNameConflictCommand([GrouplessStartOption("group", "o")] string option)
         { }
 
         public void Execute()
@@ -160,7 +160,7 @@ namespace StartOptions.Tests.Mocks.Commands
     public class GroupGrouplessOptionShortNameConflictCommand : IApplicationCommand
     {
         [StartOptionGroup("group", "g")]
-        public GroupGrouplessOptionShortNameConflictCommand([StartOption("group", "o", IsGrouplessOption = true)] string option)
+        public GroupGrouplessOptionShortNameConflictCommand([GrouplessStartOption("group", "o")] string option)
         { }
 
         public void Execute()
@@ -174,7 +174,7 @@ namespace StartOptions.Tests.Mocks.Commands
     {
         [StartOptionGroup("group", "g")]
         public OptionGrouplessOptionLongNameConflictCommand([StartOption("option", "o1")] string option1,
-                                                            [StartOption("option", "o2", IsGrouplessOption = true)] string option2)
+                                                            [GrouplessStartOption("option", "o2")] string option2)
         { }
 
         public void Execute()
@@ -188,7 +188,7 @@ namespace StartOptions.Tests.Mocks.Commands
     {
         [StartOptionGroup("group", "g")]
         public OptionGrouplessOptionShortNameConflictCommand([StartOption("option1", "o")] string option1,
-                                                             [StartOption("option2", "o", IsGrouplessOption = true)] string option2)
+                                                             [GrouplessStartOption("option2", "o")] string option2)
         { }
 
         public void Execute()

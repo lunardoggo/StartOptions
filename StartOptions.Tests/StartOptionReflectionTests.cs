@@ -60,6 +60,17 @@ namespace StartOptions.Tests
         }
 
         [Fact]
+        public void TestGrouplessOptionReference()
+        {
+            ApplicationStartOptions options = this.GetDefaultReflectionHelper().GetStartOptions(typeof(BasicMockCommand), typeof(GrouplessOptionReferenceCommand));
+
+            Assert.True(options.GrouplessStartOptions.Count() == 1);
+            Assert.True(options.StartOptionGroups.Count() == 2);
+
+            this.AssertStartOption("verbose", "vb", "Enable verbose output", false, StartOptionValueType.Switch, options.GrouplessStartOptions.Single());
+        }
+
+        [Fact]
         public void TestConstructorNameConflicts()
         {
             ReflectionHelper helper = this.GetDefaultReflectionHelper();
@@ -86,6 +97,7 @@ namespace StartOptions.Tests
             Assert.Throws<NotSupportedException>(() => helper.GetStartOptions(typeof(GenericClassCommand<object>)));
             Assert.Throws<InvalidOperationException>(() => helper.GetStartOptions(typeof(AbstractClassCommand)));
             Assert.Throws<InvalidOperationException>(() => helper.GetStartOptions(typeof(NotACommandCommand)));
+            Assert.Throws<MissingStartOptionReferenceException>(() => helper.GetStartOptions(typeof(GrouplessOptionReferenceCommand)));
         }
 
         private void AssertStartOptionGroup(string longName, string shortName, string description, StartOptionGroup group)

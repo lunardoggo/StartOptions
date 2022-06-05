@@ -22,37 +22,34 @@ namespace LunarDoggo.StartOptions.Parsing
             StartOptionParser.DefaultHelpOptions = helpOptions.ToImmutableArray();
         }
 
-        private readonly IEnumerable<StartOptionGroup> optionGroups;
-        private readonly IEnumerable<StartOption> grouplessOptions;
+        private readonly ApplicationStartOptions startOptions;
         private readonly StartOptionParserValidator validator;
-        private readonly StartOptionParserSettings settings;
-        private readonly HelpOption[] helpOptions;
+
+        public StartOptionParser(ApplicationStartOptions startOptions, bool validateNameConflicts)
+        {
+            this.startOptions = startOptions.Clone();
+            this.validator = this.GetValidator();
+
+            if (validateNameConflicts)
+            {
+                this.validator.CheckNameConflicts();
+            }
+        }
 
         /// <summary>
         /// Creates a new instance of a <see cref="StartOptionParser"/> with the provided parameters
         /// </summary>
         /// <exception cref="NameConflictException"></exception>
         /// <exception cref="ArgumentException"></exception>
-        public StartOptionParser(StartOptionParserSettings settings, IEnumerable<StartOptionGroup> groups,
+        internal StartOptionParser(StartOptionParserSettings settings, IEnumerable<StartOptionGroup> groups,
                                  IEnumerable<StartOption> grouplessOptions, IEnumerable<HelpOption> helpOptions,
-                                 bool validateNameConflics = true)
-        {
-            this.settings = settings.Clone();
-
-            this.grouplessOptions = this.GetCopiedOptions(grouplessOptions);
-            this.helpOptions = this.GetCopiedHelpOptions(helpOptions);
-            this.optionGroups = this.GetCopiedOptionGroups(groups);
-            this.validator = this.GetValidator();
-
-            if (validateNameConflics)
-            {
-                this.validator.CheckNameConflicts();
-            }
-        }
+                                 bool validateNameConflicts = true)
+            : this(new ApplicationStartOptions(groups, grouplessOptions, helpOptions, settings), validateNameConflicts)
+        { }
 
         private StartOptionParserValidator GetValidator()
         {
-            return new StartOptionParserValidator(this.settings, this.optionGroups, this.grouplessOptions, this.helpOptions);
+            return new StartOptionParserValidator(this.startOptions.StartOptionParserSettings, this.startOptions.StartOptionGroups, this.startOptions.GrouplessStartOptions, this.startOptions.HelpOptions.ToArray());
         }
 
         private StartOptionGroup[] GetCopiedOptionGroups(IEnumerable<StartOptionGroup> groups)
@@ -83,17 +80,8 @@ namespace LunarDoggo.StartOptions.Parsing
         /// </summary>
         /// <exception cref="NameConflictException"></exception>
         /// <exception cref="ArgumentException"></exception>
-        public StartOptionParser(IEnumerable<StartOptionGroup> groups, IEnumerable<StartOption> grouplessOptions, IEnumerable<HelpOption> helpOptions)
+        internal StartOptionParser(IEnumerable<StartOptionGroup> groups, IEnumerable<StartOption> grouplessOptions, IEnumerable<HelpOption> helpOptions)
             : this(new StartOptionParserSettings(), groups, grouplessOptions, helpOptions)
-        { }
-
-        /// <summary>
-        /// Creates a new instance of a <see cref="StartOptionParser"/> with the provided parameters
-        /// </summary>
-        /// <exception cref="NameConflictException"></exception>
-        /// <exception cref="ArgumentException"></exception>
-        public StartOptionParser(IEnumerable<StartOptionGroup> groups, IEnumerable<StartOption> grouplessOptions)
-            : this(new StartOptionParserSettings(), groups, grouplessOptions, StartOptionParser.DefaultHelpOptions)
         { }
 
         /// <summary>
@@ -108,10 +96,10 @@ namespace LunarDoggo.StartOptions.Parsing
             bool wasHelpRequested = this.GetWasHelpRequested(ref parsedOptions);
 
             StartOptionGroup parsedGroup = this.GetStartOptionGroup(ref parsedOptions);
-            IEnumerable<StartOption> parsedGrouplessOptions = this.GetStartOptions(this.grouplessOptions, ref parsedOptions);
+            IEnumerable<StartOption> parsedGrouplessOptions = this.GetStartOptions(this.startOptions.GrouplessStartOptions, ref parsedOptions);
 
             this.validator.CheckUnknownStartOptions(parsedOptions);
-            ParsedStartOptions output = new ParsedStartOptions(parsedGroup, parsedGrouplessOptions, wasHelpRequested);
+            ParsedStartOptions output = new ParsedStartOptions(this.startOptions, parsedGroup, parsedGrouplessOptions, wasHelpRequested);
             if (!wasHelpRequested)
             {
                 this.validator.CheckOptionRequirements(output);
@@ -121,7 +109,7 @@ namespace LunarDoggo.StartOptions.Parsing
 
         private IEnumerable<ParsedStartArgument> GetParsedStartOptions(string[] args)
         {
-            return ArgumentParserFactory.Instance.GetParser(this.settings).Parse(args);
+            return ArgumentParserFactory.Instance.GetParser(this.startOptions.StartOptionParserSettings).Parse(args);
         }
 
         private bool GetWasHelpRequested(ref List<ParsedStartArgument> parsedOptions)
@@ -140,7 +128,7 @@ namespace LunarDoggo.StartOptions.Parsing
 
         private bool IsHelpOption(ParsedStartArgument parsedArgument)
         {
-            return this.helpOptions.Any(_option => _option.Name.Equals(parsedArgument.Name) && _option.IsShortName == parsedArgument.IsShortName);
+            return this.startOptions.HelpOptions.Any(_option => _option.Name.Equals(parsedArgument.Name) && _option.IsShortName == parsedArgument.IsShortName);
         }
 
         private StartOptionGroup GetStartOptionGroup(ref List<ParsedStartArgument> parsedOptions)
@@ -173,11 +161,11 @@ namespace LunarDoggo.StartOptions.Parsing
         {
             if (option.IsShortName)
             {
-                return this.optionGroups.SingleOrDefault(_group => _group.ShortName.Equals(option.Name));
+                return this.startOptions.StartOptionGroups.SingleOrDefault(_group => _group.ShortName.Equals(option.Name));
             }
             else
             {
-                return this.optionGroups.SingleOrDefault(_group => _group.LongName.Equals(option.Name));
+                return this.startOptions.StartOptionGroups.SingleOrDefault(_group => _group.LongName.Equals(option.Name));
             }
         }
 
@@ -207,9 +195,9 @@ namespace LunarDoggo.StartOptions.Parsing
             //TODO: Throw Exception if option has value type mismatch (i.e. Switch or is single but got multiple values)
             if (option.ValueType != StartOptionValueType.Switch)
             {
-                if (value.Contains(this.settings.MultipleValueSeparator))
+                if (value.Contains(this.startOptions.StartOptionParserSettings.MultipleValueSeparator))
                 {
-                    option.ParseMultipleValues(value.Split(new char[] { this.settings.MultipleValueSeparator }, StringSplitOptions.RemoveEmptyEntries));
+                    option.ParseMultipleValues(value.Split(new char[] { this.startOptions.StartOptionParserSettings.MultipleValueSeparator }, StringSplitOptions.RemoveEmptyEntries));
                 }
                 else
                 {

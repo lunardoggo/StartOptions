@@ -36,6 +36,17 @@ namespace LunarDoggo.StartOptions.Parsing
             }
         }
 
+        public void CheckAreGrouplessStartOptionReferencesValid(Dictionary<string, List<Type>> references)
+        {
+            foreach(KeyValuePair<string, List<Type>> reference in references)
+            {
+                if(!this.grouplessOptions.Any(_option => _option.LongName.Equals(reference.Key)))
+                {
+                    throw new MissingStartOptionReferenceException($"The groupless start option reference \"{reference.Key}\" could not be resolved in {String.Join(", ", reference.Value.Select(_type => _type.FullName))}");
+                }
+            }
+        }
+
         public void CheckNameConflicts()
         {
             this.CheckGrouplessStartOptionNameConflicts();

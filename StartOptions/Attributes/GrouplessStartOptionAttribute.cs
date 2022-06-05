@@ -1,16 +1,23 @@
-﻿//using System;
+﻿using System;
 
-//namespace LunarDoggo.StartOptions.Attributes
-//{
-//    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
-//    public class GrouplessStartOptionAttribute : Attribute
-//    {
-//        /// <param name="associatedLongName">Long name of the associated startoption provided in the application's constructor</param>
-//        public GrouplessStartOptionAttribute(string associatedLongName)
-//        {
-//            this.AssociatedLongName = associatedLongName;
-//        }
+namespace LunarDoggo.StartOptions
+{
+    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
+    public class GrouplessStartOptionAttribute : StartOptionAttribute
+    {
+        public GrouplessStartOptionAttribute(string longName, string shortName) : base(longName, shortName)
+        { }
+    }
 
-//        public string AssociatedLongName { get; }
-//    }
-//}
+    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
+    public class GrouplessStartOptionReferenceAttribute : Attribute
+    {
+        /// <param name="associatedLongName">Long name of the associated startoption provided in the application's constructor</param>
+        public GrouplessStartOptionReferenceAttribute(string associatedLongName)
+        {
+            this.AssociatedLongName = associatedLongName;
+        }
+
+        public string AssociatedLongName { get; }
+    }
+}
