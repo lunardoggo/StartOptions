@@ -217,12 +217,12 @@ static void Main(string[] args)
     application.Run(args);
 }
 ```
-4. If you wish to use the same groupless `StartOption` with the **command-based approach** across multiple different constructors or classes, make sure that the `StartOptionAttribute` of each instance of the same parameter is defined in exactly the same way (every value specified in the attribute has to be exactly the same!):
+4. If you wish to use the same groupless `StartOption` with the **command-based approach** across multiple different constructors or classes, at first implement one command with a constructor parameter decorated with `GrouplessStartOptionAttribute` and another one (another constructor in the same or a different class) decorated with `GrouplessStartOptionReferenceAttribute`. Make sure that no groupless start options use duplicate names:
 ```csharp
 class FirstCommand : ApplicationCommand
 {
     [StartOptionGroup("first", "f")]
-    public FirstCommand(..., [StartOption("verbose", "v", Description = "Enable verbose output", IsGrouplessOption = true)]bool verbose)
+    public FirstCommand(..., [GrouplessStartOption("verbose", "v", Description = "Enable verbose output", IsGrouplessOption = true)]bool verbose)
     {
         ...
     }
@@ -232,7 +232,7 @@ class FirstCommand : ApplicationCommand
 class SecondCommand : ApplicationCommand
 {
     [StartOptionGroup("second", "s")]
-    public SecondCommand(..., [StartOption("verbose", "v", Description = "Enable verbose output", IsGrouplessOption = true)]bool verbose)
+    public SecondCommand(..., [GrouplessStartOptionReference("verbose")]bool verbose)
     {
         ...
     }
