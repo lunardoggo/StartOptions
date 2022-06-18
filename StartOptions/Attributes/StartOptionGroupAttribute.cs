@@ -16,15 +16,15 @@ namespace LunarDoggo.StartOptions
         /// <summary>
         /// Gets or sets the value type of the <see cref="StartOption"/> (Switch, Single, Multiple)
         /// </summary>
-        public StartOptionValueType ValueType { get; set; } = StartOptionValueType.Switch;
+        public StartOptionValueType ValueType { get; set; } = StartOption.DefaultValueType;
         /// <summary>
         /// Gets or sets the <see cref="Type"/> of the <see cref="IStartOptionValueParser"/> for the <see cref="StartOption"/>
         /// </summary>
-        public Type ParserType { get; set; } = null;
+        public Type ParserType { get; set; } = StartOption.DefaultValueParser != null ? StartOption.DefaultValueParser.GetType() : null;
         /// <summary>
         /// Gets or sets the description of the <see cref="StartOptionGroup"/> displayed on the help page
         /// </summary>
-        public string Description { get; set; }
+        public string Description { get; set; } = StartOption.DefaultDescription;
 
         /// <summary>
         /// Returns the short name of the <see cref="StartOptionGroup"/>

@@ -6,11 +6,10 @@ namespace LunarDoggo.StartOptions
 {
     public abstract class AbstractApplication
     {
-        internal readonly ApplicationStartOptions options;
+        protected ApplicationStartOptions options;
 
         public AbstractApplication()
         {
-            this.options = this.GetApplicationStartOptions();
         }
 
         /// <summary>
@@ -20,6 +19,7 @@ namespace LunarDoggo.StartOptions
         /// <param name="args">Command line arguments provided by the user</param>
         public virtual void Run(string[] args)
         {
+            this.options = this.GetApplicationStartOptions();
             StartOptionParser parser = new StartOptionParser(this.options.StartOptionParserSettings, this.options.StartOptionGroups,
                                                              this.options.GrouplessStartOptions, this.options.HelpOptions);
             ParsedStartOptions parsed = parser.Parse(args);
@@ -85,6 +85,10 @@ namespace LunarDoggo.StartOptions
 
         public ApplicationStartOptions(IEnumerable<StartOptionGroup> groups, IEnumerable<StartOption> grouplessOptions)
             : this(groups, grouplessOptions, StartOptionParser.DefaultHelpOptions, new StartOptionParserSettings())
+        { }
+
+        public ApplicationStartOptions(IEnumerable<StartOptionGroup> groups, IEnumerable<StartOption> grouplessOptions, StartOptionParserSettings parserSettings)
+            : this(groups, grouplessOptions, StartOptionParser.DefaultHelpOptions, parserSettings)
         { }
 
         /// <summary>

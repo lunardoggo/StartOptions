@@ -138,6 +138,19 @@ namespace LunarDoggo.StartOptions.Reflection
 
         private void ProcessTypeOptions(Type type, ref List<StartOptionGroup> groups, ref List<StartOption> options, ref Dictionary<string, List<Type>> startOptionReferences)
         {
+            if(typeof(CommandApplication).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
+            {
+                IEnumerable<GrouplessStartOptionAttribute> grouplessOptions = type.GetTypeInfo().GetCustomAttributes<GrouplessStartOptionAttribute>();
+                options.AddRange(grouplessOptions.Select(_option => this.GetStartOption(_option)));
+            }
+            else
+            {
+                this.GetStartOptionsFromConstructors(type, ref groups, ref options, ref startOptionReferences);
+            }
+        }
+
+        private void GetStartOptionsFromConstructors(Type type, ref List<StartOptionGroup> groups, ref List<StartOption> options, ref Dictionary<string, List<Type>> startOptionReferences)
+        {
             List<StartOption> grouplessOptionCache = new List<StartOption>();
             List<StartOption> groupOptionCache = new List<StartOption>();
 
@@ -175,7 +188,7 @@ namespace LunarDoggo.StartOptions.Reflection
             {
                 GrouplessStartOptionReferenceAttribute referenceAttribute = parameter.GetCustomAttribute<GrouplessStartOptionReferenceAttribute>();
                 StartOptionGroupValueAttribute groupAttribute = parameter.GetCustomAttribute<StartOptionGroupValueAttribute>();
-                StartOptionAttribute optionAttribute = parameter.GetCustomAttribute<StartOptionAttribute>();
+                StartOptionAttribute optionAttribute = this.GetSingleStartOptionAttribute(parameter);
 
                 if (referenceAttribute == null && optionAttribute == null && groupAttribute == null && this.dependencyProvider == null)
                 {
@@ -215,6 +228,16 @@ namespace LunarDoggo.StartOptions.Reflection
             };
         }
 
+        private StartOptionAttribute GetSingleStartOptionAttribute(ParameterInfo parameter)
+        {
+            IEnumerable<StartOptionAttribute> attributes = parameter.GetCustomAttributes<StartOptionAttribute>();
+            if(attributes?.Count() > 1)
+            {
+                throw new AmbiguousMatchException($"There can only be one StartOptionAttribute or GrouplessStartOptionAttribute assignet to each parameter (parameter: {parameter.Name})");
+            }
+            return attributes.SingleOrDefault();
+        }
+
         private StartOption GetStartOption(StartOptionAttribute attribute)
         {
             return new StartOption(attribute.LongName, attribute.ShortName, attribute.Description, StartOptionValueParserRegistry.GetParser(attribute.ParserType), attribute.ValueType, attribute.IsMandatory);
@@ -222,9 +245,12 @@ namespace LunarDoggo.StartOptions.Reflection
 
         private void ValidateTypeInfo(Type type, TypeInfo typeInfo)
         {
-            if (!typeof(IApplicationCommand).GetTypeInfo().IsAssignableFrom(typeInfo))
+            bool isApplication = typeof(CommandApplication).GetTypeInfo().IsAssignableFrom(typeInfo);
+            bool isCommand = typeof(IApplicationCommand).GetTypeInfo().IsAssignableFrom(typeInfo);
+
+            if (!isApplication && !isCommand)
             {
-                throw new InvalidOperationException("The type has to inherit from IApplicationCommand.", this.GetTypeInQuestionException(type));
+                throw new InvalidOperationException("The type has to implement IApplicationCommand or inherit from CommandApplication.", this.GetTypeInQuestionException(type));
             }
             if (typeInfo.IsAbstract)
             {

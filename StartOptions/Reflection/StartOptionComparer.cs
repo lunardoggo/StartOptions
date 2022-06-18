@@ -31,7 +31,7 @@ namespace LunarDoggo.StartOptions.Reflection
 
             unchecked
             {
-                return option.LongName.GetHashCode() * option.ShortName.GetHashCode() * option.Description.GetHashCode()
+                return option.LongName.GetHashCode() * option.ShortName.GetHashCode() * (option.Description ?? String.Empty).GetHashCode()
                      * option.IsMandatory.GetHashCode() * option.ValueType.GetHashCode() * (option.ParserType?.FullName ?? String.Empty).GetHashCode();
             }
         }

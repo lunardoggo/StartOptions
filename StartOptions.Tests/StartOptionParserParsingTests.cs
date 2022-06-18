@@ -18,10 +18,10 @@ namespace StartOptions.Tests
         {
             StartOptionParser parser = this.GetDefaultStartOptionParser();
 
-            this.AssertWasHelpRequested(parser, "-h");
-            this.AssertWasHelpRequested(parser, "--help");
-            this.AssertWasHelpRequested(parser, "-?");
-            this.AssertWasHelpRequested(parser, "-h", "-i", "-p=./user.txt");
+            AssertionUtility.WasHelpRequested(parser, "-h");
+            AssertionUtility.WasHelpRequested(parser, "--help");
+            AssertionUtility.WasHelpRequested(parser, "-?");
+            AssertionUtility.WasHelpRequested(parser, "-h", "-i", "-p=./user.txt");
         }
 
         [Fact]
@@ -40,8 +40,8 @@ namespace StartOptions.Tests
 
             Assert.False(group.HasValue);
             Assert.Equal("e", group.ShortName);
-            this.AssertStartOptionHasValue(group.GetOptionByShortName("u"), "testuser");
-            this.AssertStartOptionHasValue(group.GetOptionByShortName("p"), "./user.txt");
+            AssertionUtility.StartOptionHasValue(group.GetOptionByShortName("u"), "testuser");
+            AssertionUtility.StartOptionHasValue(group.GetOptionByShortName("p"), "./user.txt");
         }
 
         [Fact]
@@ -53,14 +53,14 @@ namespace StartOptions.Tests
             ParsedStartOptions parsed = parser.Parse(args);
 
             Assert.False(parsed.WasHelpRequested);
-            this.AssertHasAllGrouplessOptions(parsed);
+            AssertionUtility.HasAllGrouplessOptions(parsed);
 
             Assert.NotNull(parsed.ParsedOptionGroup);
             StartOptionGroup group = parsed.ParsedOptionGroup;
 
             Assert.False(group.HasValue);
             Assert.Equal("i", group.ShortName);
-            this.AssertStartOptionHasValue(group.GetOptionByShortName("p"), "./user.txt");
+            AssertionUtility.StartOptionHasValue(group.GetOptionByShortName("p"), "./user.txt");
             Assert.NotNull(group.GetOptionByShortName("f"));
         }
 
@@ -74,7 +74,7 @@ namespace StartOptions.Tests
 
             Assert.False(parsed.WasHelpRequested);
             Assert.Null(parsed.ParsedOptionGroup);
-            this.AssertHasAllGrouplessOptions(parsed);
+            AssertionUtility.HasAllGrouplessOptions(parsed);
         }
 
         [Fact]

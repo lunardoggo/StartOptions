@@ -1,4 +1,5 @@
-﻿using LunarDoggo.StartOptions.Parsing.Values;
+﻿using LunarDoggo.StartOptions.Building;
+using LunarDoggo.StartOptions.Parsing.Values;
 using System;
 
 namespace LunarDoggo.StartOptions
@@ -17,21 +18,21 @@ namespace LunarDoggo.StartOptions
         /// <summary>
         /// Gets or sets the value type of the <see cref="StartOption"/> (Switch, Single, Multiple)
         /// </summary>
-        public StartOptionValueType ValueType { get; set; } = StartOptionValueType.Switch;
+        public StartOptionValueType ValueType { get; set; } = StartOption.DefaultValueType;
         /// <summary>
         /// Gets or sets the description of the <see cref="StartOption"/> displayed on the help page
         /// </summary>
-        public string Description { get; set; } = String.Empty;
+        public string Description { get; set; } = StartOption.DefaultDescription;
         /// <summary>
         /// Gets or sets the <see cref="Type"/> of the <see cref="IStartOptionValueParser"/> for the <see cref="StartOption"/>
         /// </summary>
-        public Type ParserType { get; set; } = null;
+        public Type ParserType { get; set; } = StartOption.DefaultValueParser != null ? StartOption.DefaultValueParser.GetType() : null;
         /// <summary>
         /// Gets or sets whether the <see cref="StartOption"/> has to be set. If this <see cref="StartOption"/> is groupless,
         /// it will always have to be set by users, if you set it to true. If it is part of a <see cref="StartOptionGroup"/>
         /// it is only required if the group is selected by the user
         /// </summary>
-        public bool IsMandatory { get; set; } = false;
+        public bool IsMandatory { get; set; } = StartOption.DefaultIsMandatory;
 
         /// <summary>
         /// Gets or sets whether the <see cref="StartOption"/> has to be set. If this <see cref="StartOption"/> is groupless,

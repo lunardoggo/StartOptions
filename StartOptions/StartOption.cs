@@ -5,6 +5,11 @@ namespace LunarDoggo.StartOptions
 {
     public class StartOption : BaseStartOption, IClonable<StartOption>
     {
+        internal static readonly StartOptionValueType DefaultValueType = StartOptionValueType.Switch;
+        internal static readonly IStartOptionValueParser DefaultValueParser = null;
+        internal static readonly string DefaultDescription = null;
+        internal static readonly bool DefaultIsMandatory = false;
+
         internal StartOption(string longName, string shortName, string description, IStartOptionValueParser valueParser, StartOptionValueType valueType, bool mandatory)
             : base(longName, shortName, description, valueType, valueParser)
         {

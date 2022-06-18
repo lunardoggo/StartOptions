@@ -2,7 +2,7 @@
 
 namespace LunarDoggo.StartOptions
 {
-    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
     public class GrouplessStartOptionAttribute : StartOptionAttribute
     {
         public GrouplessStartOptionAttribute(string longName, string shortName) : base(longName, shortName)

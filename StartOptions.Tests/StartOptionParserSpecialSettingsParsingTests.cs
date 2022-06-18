@@ -4,7 +4,6 @@ using LunarDoggo.StartOptions.Parsing;
 using System.Collections.Generic;
 using LunarDoggo.StartOptions;
 using System.Linq;
-using System;
 using Xunit;
 
 namespace StartOptions.Tests
@@ -16,10 +15,10 @@ namespace StartOptions.Tests
         {
             StartOptionParser parser = this.GetSpecialStartOptionParser();
 
-            this.AssertWasHelpRequested(parser, "/h");
-            this.AssertWasHelpRequested(parser, "&help");
-            this.AssertWasHelpRequested(parser, "/?");
-            this.AssertWasHelpRequested(parser, "/h", "/i", "/p", "./user.txt");
+            AssertionUtility.WasHelpRequested(parser, "/h");
+            AssertionUtility.WasHelpRequested(parser, "&help");
+            AssertionUtility.WasHelpRequested(parser, "/?");
+            AssertionUtility.WasHelpRequested(parser, "/h", "/i", "/p", "./user.txt");
         }
 
         [Fact]
@@ -38,7 +37,7 @@ namespace StartOptions.Tests
             Assert.NotNull(group);
             Assert.False(group.HasValue);
             Assert.Equal("i", group.ShortName);
-            this.AssertStartOptionHasValue(group.GetOptionByShortName("p"), "./user.txt");
+            AssertionUtility.StartOptionHasValue(group.GetOptionByShortName("p"), "./user.txt");
             Assert.NotNull(group.GetOptionByShortName("f"));
         }
 
@@ -51,14 +50,14 @@ namespace StartOptions.Tests
             ParsedStartOptions parsed = parser.Parse(args);
 
             Assert.False(parsed.WasHelpRequested);
-            this.AssertHasAllGrouplessOptions(parsed);
+            AssertionUtility.HasAllGrouplessOptions(parsed);
 
             StartOptionGroup group = parsed.ParsedOptionGroup;
             Assert.NotNull(group);
             Assert.False(group.HasValue);
             Assert.Equal("e", group.ShortName);
-            this.AssertStartOptionHasValue(group.GetOptionByShortName("u"), "testuser");
-            this.AssertStartOptionHasValue(group.GetOptionByShortName("p"), "./user.txt");
+            AssertionUtility.StartOptionHasValue(group.GetOptionByShortName("u"), "testuser");
+            AssertionUtility.StartOptionHasValue(group.GetOptionByShortName("p"), "./user.txt");
         }
 
         [Fact]
@@ -71,7 +70,7 @@ namespace StartOptions.Tests
 
             Assert.False(parsed.WasHelpRequested);
             Assert.Null(parsed.ParsedOptionGroup);
-            this.AssertHasAllGrouplessOptions(parsed);
+            AssertionUtility.HasAllGrouplessOptions(parsed);
         }
 
         [Fact]

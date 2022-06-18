@@ -5,10 +5,10 @@ namespace LunarDoggo.StartOptions.Building
 {
     public class StartOptionBuilder : AbstractOptionBuilder<StartOption>
     {
-        private IStartOptionValueParser valueParser;
-        private StartOptionValueType valueType;
-        private string description;
-        private bool mandatory;
+        private IStartOptionValueParser valueParser = StartOption.DefaultValueParser;
+        private StartOptionValueType valueType = StartOption.DefaultValueType;
+        private string description = StartOption.DefaultDescription;
+        private bool mandatory = StartOption.DefaultIsMandatory;
 
         /// <summary>
         /// Creates a new builder for a <see cref="StartOption"/> with the provided long and short name

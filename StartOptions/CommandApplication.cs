@@ -2,6 +2,7 @@
 using LunarDoggo.StartOptions.Reflection;
 using LunarDoggo.StartOptions.Parsing;
 using System.Collections.Generic;
+using System.Linq;
 using System;
 
 namespace LunarDoggo.StartOptions
@@ -14,7 +15,7 @@ namespace LunarDoggo.StartOptions
         {
             StartOptionParserSettings settings = this.GetParserSettings();
             IEnumerable<HelpOption> helpOptions = this.GetHelpOptions();
-            Type[] commandTypes = this.GetCommandTypes();
+            Type[] commandTypes = this.GetCommandTypes().Concat(new [] { this.GetType() }).ToArray();
             this.helper = new ReflectionHelper(helpOptions, settings, this.GetDependencyProvider());
             return this.helper.GetStartOptions(commandTypes);
         }
@@ -22,11 +23,10 @@ namespace LunarDoggo.StartOptions
         protected override void Run(StartOptionGroup selectedGroup, IEnumerable<StartOption> selectedGrouplessOptions)
         {
             IApplicationCommand command = this.helper.Instantiate(new ParsedStartOptions(base.options, selectedGroup, selectedGrouplessOptions, false));
-            if(command == null)
+            if(command != null)
             {
-                throw new NullReferenceException("Couldn't instantiate an IApplicationCommand with the provided parameters");
+                command.Execute();
             }
-            command.Execute();
         }
 
         /// <summary>

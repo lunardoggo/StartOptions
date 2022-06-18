@@ -90,6 +90,7 @@ namespace LunarDoggo.StartOptions.Parsing
         /// </summary>
         /// <exception cref="OptionRequirementException"></exception>
         /// <exception cref="UnknownOptionNameException"></exception>
+        /// <exception cref="InvalidOperationException"></exception>
         public ParsedStartOptions Parse(string[] args)
         {
             List<ParsedStartArgument> parsedOptions = this.GetParsedStartOptions(args).ToList();
@@ -147,6 +148,11 @@ namespace LunarDoggo.StartOptions.Parsing
 
             if (groups.Any())
             {
+                if(groups.Count > 1)
+                {
+                    throw new InvalidOperationException("More than one StartOptionGroup was provided in the start arguments");
+                }
+
                 KeyValuePair<StartOptionGroup, ParsedStartArgument> pair = groups.Single();
                 StartOptionGroup group = pair.Key;
                 IEnumerable<StartOption> options = this.GetStartOptions(group.Options, ref parsedOptions);

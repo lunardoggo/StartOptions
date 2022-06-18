@@ -57,14 +57,11 @@ namespace LunarDoggo.StartOptions.Parsing
 
         public void CheckOptionRequirements(ParsedStartOptions parsedOptions)
         {
-            if (this.settings.RequireStartOptionGroup)
+            if (this.settings.RequireStartOptionGroup && parsedOptions.ParsedOptionGroup is null)
             {
-                if (parsedOptions.ParsedOptionGroup is null)
-                {
-                    throw new OptionRequirementException("At least one StartOptionGroup must be selected");
-                }
+                throw new OptionRequirementException("At least one StartOptionGroup must be selected");
             }
-
+            
             if (!(parsedOptions.ParsedOptionGroup is null))
             {
                 StartOptionGroup selected = this.optionGroups.Single(_group => _group.LongName.Equals(parsedOptions.ParsedOptionGroup.LongName));

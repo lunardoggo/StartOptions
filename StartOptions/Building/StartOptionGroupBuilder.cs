@@ -8,9 +8,9 @@ namespace LunarDoggo.StartOptions.Building
     public class StartOptionGroupBuilder : AbstractOptionBuilder<StartOptionGroup>
     {
         private readonly List<StartOption> options = new List<StartOption>();
-        private StartOptionValueType valueType = StartOptionValueType.Switch;
-        private IStartOptionValueParser parser;
-        private string description;
+        private IStartOptionValueParser parser = StartOption.DefaultValueParser;
+        private StartOptionValueType valueType = StartOption.DefaultValueType;
+        private string description = StartOption.DefaultDescription;
 
         /// <summary>
         /// Creates a new builder for a <see cref="StartOptionGroup"/> with the provided long and short name

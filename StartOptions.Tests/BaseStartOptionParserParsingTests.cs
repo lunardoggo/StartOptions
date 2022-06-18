@@ -9,24 +9,6 @@ namespace StartOptions.Tests
 {
     public abstract class BaseStartOptionParserParsingTests
     {
-        protected void AssertWasHelpRequested(StartOptionParser parser, params string[] args)
-        {
-            Assert.True(parser.Parse(args).WasHelpRequested);
-        }
-
-        protected void AssertStartOptionHasValue<T>(StartOption option, T value)
-        {
-            Assert.True(option.HasValue);
-            Assert.Equal(value, option.GetValue<T>());
-        }
-
-        protected void AssertHasAllGrouplessOptions(ParsedStartOptions parsed)
-        {
-            Assert.Equal(2, parsed.ParsedGrouplessOptions.Count());
-            Assert.NotNull(parsed.ParsedGrouplessOptions.SingleOrDefault(_option => _option.ShortName.Equals("d")));
-            Assert.NotNull(parsed.ParsedGrouplessOptions.SingleOrDefault(_option => _option.ShortName.Equals("v")));
-        }
-
         protected StartOptionParser GetStartOptionParser(StartOptionParserSettings settings, HelpOption[] helpOptions)
         {
             IEnumerable<StartOptionGroup> groups = this.GetStartOptionGroups();
