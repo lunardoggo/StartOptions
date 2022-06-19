@@ -7,6 +7,7 @@ using System;
 
 namespace StartOptions.Demo
 {
+    [GrouplessStartOption("verbose", "v", Description = "Enables verbose output")]
     public class DemoApplication : CommandApplication
     {
         private const string appDescription = "This app is intended as a demonstration of the attribute based workflow with the LunarDoggo.StartOptions library.";

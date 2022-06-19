@@ -165,6 +165,22 @@ namespace StartOptions.Tests
             Assert.Contains(firstOptions.ParsedOptionGroup.Options, _option => _option.ShortName.Equals("gr"));
         }
 
+        [Fact]
+        public void TestParseStartOptionGroupWithMultipleValues()
+        {
+            StartOptionParser parser = this.GetDefaultStartOptionParser();
+
+            ParsedStartOptions parsed = parser.Parse(new string[] { "-s=1,2,3,4,5" });
+            StartOptionGroup group = parsed.ParsedOptionGroup;
+            Assert.NotNull(group);
+            AssertionUtility.Array(new int[] { 1, 2, 3, 4, 5 }, group.GetValue<int[]>());
+
+            parsed = parser.Parse(new string[] { "-s=1" });
+            group = parsed.ParsedOptionGroup;
+            Assert.NotNull(group);
+            AssertionUtility.Array(new int[] { 1 }, group.GetValue<int[]>());
+        }
+
         private StartOptionParser GetOptionParserWithRequiredOptions(StartOptionValueType groupValueType = StartOptionValueType.Switch, IStartOptionValueParser groupValueParser = null)
         {
             StartOptionGroup[] groups = new StartOptionGroup[]

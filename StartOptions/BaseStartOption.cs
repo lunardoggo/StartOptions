@@ -1,4 +1,7 @@
 ﻿using LunarDoggo.StartOptions.Parsing.Values;
+using System.Collections;
+using System.Reflection;
+using System.Linq;
 using System;
 
 namespace LunarDoggo.StartOptions
@@ -47,6 +50,15 @@ namespace LunarDoggo.StartOptions
         {
             if (this.value != null)
             {
+                if(typeof(T).IsArray)
+                {
+                    Type innerType = typeof(T).GetElementType();
+                    object[] values = ((this.value is object[]) ? (object[])this.value : new object[] { this.value })
+                                       .Select(_value => _value != null ? Convert.ChangeType(_value, innerType) : null).ToArray();
+                    Array array = Array.CreateInstance(innerType, values.Length);
+                    Array.Copy(values, array, values.Length);
+                    return (T)((object)array);
+                }
                 return (T)this.value;
             }
             return default;

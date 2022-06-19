@@ -63,6 +63,8 @@ public class AddCommand : IApplicationCommand
     }
 }
 ```
+**Note**: See **Final notes and hints** below to learn how to implement groupless StartOptions.
+
 After you created all the commands you want to use, create a new class that inherits from `CommandApplication` and override its abstract methods:
 ```csharp
 class DemoApplication : CommandApplication
@@ -238,4 +240,35 @@ class SecondCommand : ApplicationCommand
     }
     ...
 }
+```
+
+4. 1 You can also decorate your `CommandApplication` or any of your `IApplicationCommand` implementations with `GrouplessStartOptionAttribute` if you prefer your grouless StartOptions to be declared in a central location:
+```
+[GrouplessStartOption("verbose", "v", Description = "Enable verbose output")]
+public class DemoApplication : CommandApplication
+{
+    ...
+}
+
+[GrouplessStartOption("debug", "d", Description = "Enable debug mode")]
+public class DemoCommand : IApplicationCommand
+{
+    public DemoCommand(..., [GrouplessStartOptionReference("verbose")]bool verbose,
+                       [GrouplessStartOptionReference("debug")]bool debug)
+   {
+       ...
+   }
+    ...
+}
+```
+
+5. If you want to handle groupless StartOptions of your `CommandApplication` in a central location, you can attach handlers to your application (note: right now you can only attach one handler per groupless StartOption) by using these methods either in your application's constructor or from outside your application class:
+```
+CommandApplication app = new DemoApplication();
+//for groupless StartOptions of type Multiple
+app.AddGlobalGrouplessStartOptionHandler<T>("numbers", (int[] _numbers) => this.Numbers = _numbers);
+//for groupless StartOptions of type Single
+app.AddGlobalGrouplessStartOptionHandler<T>("user", (string _username) => this.Username = _username);
+//for groupless StartOptions of type Switch
+app.AddGlobalGrouplessStartOptionHandler("verbose", () => this.Verbose = true);
 ```

@@ -19,10 +19,10 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon></PackageIcon>
     <FileVersion>1.0.0</FileVersion>
-	<VersionPrefix>1.1.0-preview.20220605</VersionPrefix>
-	<PackageVersion>1.1.0-preview.20220605</PackageVersion>
+	<VersionPrefix>1.1.0-preview.20220619</VersionPrefix>
+	<PackageVersion>1.1.0-preview.20220619</PackageVersion>
     <AssemblyVersion>1.1.0</AssemblyVersion>
-	<PackageReleaseNotes>Added possibility for start option groups to have values; note: the new parts of the library may contain undiscovered major bugs</PackageReleaseNotes>
+	<PackageReleaseNotes>Added global groupless start option handling for CommandApplications, GrouplessStartOptionAttribute can now decorate CommandApplications; note: the new parts of the library may contain undiscovered major bugs</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

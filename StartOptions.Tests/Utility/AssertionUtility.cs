@@ -1,6 +1,7 @@
 using LunarDoggo.StartOptions.Parsing;
 using LunarDoggo.StartOptions;
 using System.Linq;
+using System;
 using Xunit;
 
 namespace StartOptions.Tests
@@ -39,6 +40,30 @@ namespace StartOptions.Tests
             Assert.Equal(description, option.Description);
             Assert.Equal(mandatory, option.IsMandatory);
             Assert.Equal(valueType, option.ValueType);
+        }
+
+        public static void Array<T>(T[] expected, T[] actual, Func<T, T, bool> comparer = null)
+        {
+            if (expected is null)
+            {
+                Assert.Null(actual);
+            }
+            else
+            {
+                Assert.Equal(expected.Length, actual.Length);
+
+                for (int i = 0; i < expected.Length; i++)
+                {
+                    if (comparer == null)
+                    {
+                        Assert.Equal(expected[i], actual[i]);
+                    }
+                    else
+                    {
+                        Assert.True(comparer.Invoke(expected[i], actual[i]));
+                    }
+                }
+            }
         }
     }
 }

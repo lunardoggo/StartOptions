@@ -1,9 +1,8 @@
-﻿using LunarDoggo.StartOptions.Building;
+﻿using LunarDoggo.StartOptions.Parsing.Values;
+using LunarDoggo.StartOptions.Building;
 using LunarDoggo.StartOptions.Parsing;
 using System.Collections.Generic;
 using LunarDoggo.StartOptions;
-using System.Linq;
-using Xunit;
 
 namespace StartOptions.Tests
 {
@@ -31,8 +30,12 @@ namespace StartOptions.Tests
                 .AddOption("force", "f", (_builder) => _builder.SetDescription("Force a pre-existing user record to be overwritten"))
                 .Build();
 
+            StartOptionGroup third = new StartOptionGroupBuilder("sum", "s").SetDescription("Sums up all provided numbers")
+                .SetValueParser(new Int32OptionValueParser()).SetValueType(StartOptionValueType.Multiple).Build();
+
             groups.Add(first);
             groups.Add(second);
+            groups.Add(third);
 
             return groups;
         }
