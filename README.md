@@ -243,7 +243,7 @@ class SecondCommand : ApplicationCommand
 ```
 
 4. 1 You can also decorate your `CommandApplication` or any of your `IApplicationCommand` implementations with `GrouplessStartOptionAttribute` if you prefer your grouless StartOptions to be declared in a central location:
-```
+```csharp
 [GrouplessStartOption("verbose", "v", Description = "Enable verbose output")]
 public class DemoApplication : CommandApplication
 {
@@ -263,7 +263,7 @@ public class DemoCommand : IApplicationCommand
 ```
 
 5. If you want to handle groupless StartOptions of your `CommandApplication` in a central location, you can attach handlers to your application (note: right now you can only attach one handler per groupless StartOption) by using these methods either in your application's constructor or from outside your application class:
-```
+```csharp
 CommandApplication app = new DemoApplication();
 //for groupless StartOptions of type Multiple
 app.AddGlobalGrouplessStartOptionHandler<T>("numbers", (int[] _numbers) => this.Numbers = _numbers);
