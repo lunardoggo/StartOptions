@@ -8,6 +8,8 @@ namespace LunarDoggo.StartOptions.DependencyInjection
         private readonly Dictionary<Type, object> dependencies = new Dictionary<Type, object>();
         private readonly bool throwIfNotFound;
 
+        /// <param name="throwExceptionIfDependencyNotFound">If set to true, a <see cref="KeyNotFoundException"/> will be
+        /// thrown if you try to retrieve a value that hasn't been added previously to this <see cref="IDependencyProvider"/></param>
         public SimpleDependencyProvider(bool throwExceptionIfDependencyNotFound)
         {
             this.throwIfNotFound = throwExceptionIfDependencyNotFound;

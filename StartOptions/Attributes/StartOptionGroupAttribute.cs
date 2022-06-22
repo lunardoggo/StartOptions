@@ -5,6 +5,10 @@ namespace LunarDoggo.StartOptions
     [AttributeUsage(AttributeTargets.Constructor, AllowMultiple = false, Inherited = true)]
     public class StartOptionGroupAttribute : Attribute
     {
+        /// <summary>
+        /// Defines a new <see cref="StartOptionGroup"/>. This attribute has to be used to decorate
+        /// one of the constructors of one of you classes implementing <see cref="IApplicationCommand"/>
+        /// </summary>
         /// <param name="longName">Long name of the <see cref="StartOptionGroup"/></param>
         /// <param name="shortName">Short name of the <see cref="StartOptionGroup"/></param>
         public StartOptionGroupAttribute(string longName, string shortName)

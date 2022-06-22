@@ -7,6 +7,10 @@ namespace LunarDoggo.StartOptions
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
     public class StartOptionAttribute : Attribute
     {
+        /// <summary>
+        /// Defines a new <see cref="StartOption"/>. This attribute has to decorate a constructor parameter of
+        /// one of your classes implementing <see cref="IApplicationCommand"/>
+        /// </summary>
         /// <param name="longName">Long name of the <see cref="StartOption"/></param>
         /// <param name="shortName">Short name of the <see cref="StartOption"/></param>
         public StartOptionAttribute(string longName, string shortName)

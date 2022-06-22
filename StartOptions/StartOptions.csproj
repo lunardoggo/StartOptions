@@ -19,8 +19,8 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon></PackageIcon>
     <FileVersion>1.0.0</FileVersion>
-	<VersionPrefix>1.1.0-preview.20220619</VersionPrefix>
-	<PackageVersion>1.1.0-preview.20220619</PackageVersion>
+	<VersionPrefix>1.1.0-preview.20220622</VersionPrefix>
+	<PackageVersion>1.1.0-preview.20220622</PackageVersion>
     <AssemblyVersion>1.1.0</AssemblyVersion>
 	<PackageReleaseNotes>Added global groupless start option handling for CommandApplications, GrouplessStartOptionAttribute can now decorate CommandApplications; note: the new parts of the library may contain undiscovered major bugs</PackageReleaseNotes>
   </PropertyGroup>

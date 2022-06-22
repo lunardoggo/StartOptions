@@ -8,10 +8,6 @@ namespace LunarDoggo.StartOptions
     {
         protected ApplicationStartOptions options;
 
-        public AbstractApplication()
-        {
-        }
-
         /// <summary>
         /// Runs the <see cref="AbstractApplication"/>. If the user used a <see cref="HelpOption"/>, the help page will be displayed,
         /// otherwise the application will be executed
@@ -35,7 +31,7 @@ namespace LunarDoggo.StartOptions
         }
 
         /// <summary>
-        /// Prints the help page
+        /// Prints the application's help page
         /// </summary>
         protected virtual void PrintHelpPage(ParsedStartOptions parsed)
         {
