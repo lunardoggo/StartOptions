@@ -1,6 +1,4 @@
 ﻿using LunarDoggo.StartOptions.Parsing.Values;
-using System.Collections;
-using System.Reflection;
 using System.Linq;
 using System;
 
@@ -19,6 +17,8 @@ namespace LunarDoggo.StartOptions
             this.ValueType = valueType;
             this.LongName = longName;
         }
+
+        internal IStartOptionValueParser ValueParser { get { return this.valueParser; } }
 
         /// <summary>
         /// Returns the description of the <see cref="StartOption"/> or <see cref="StartOptionGroup"/>

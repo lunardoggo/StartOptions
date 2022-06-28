@@ -8,16 +8,29 @@ namespace LunarDoggo.StartOptions.HelpPages
 {
     public class ConsoleHelpPrinter : IHelpPagePrinter
     {
-        protected readonly string applicationDescription;
-        protected readonly char indentationChar;
+        protected readonly ConsoleHelpPrinterSettings settings;
 
-        public ConsoleHelpPrinter(char indentationChar, string applicationDescription)
+        public ConsoleHelpPrinter(ConsoleHelpPrinterSettings settings)
         {
-            this.applicationDescription = applicationDescription;
-            this.indentationChar = indentationChar;
+            this.settings = settings;
         }
 
-        public ConsoleHelpPrinter(char indentationChar) : this(indentationChar, null)
+        public ConsoleHelpPrinter(string indentation, string applicationDescription, bool printValueTypes)
+            : this(new ConsoleHelpPrinterSettings() { AppDescription = applicationDescription, Indentation = indentation, PrintValueTypes = printValueTypes })
+        { }
+        public ConsoleHelpPrinter(string indentation, string applicationDescription) : this(indentation, applicationDescription, false)
+        { }
+
+        public ConsoleHelpPrinter(string indentation) : this(indentation, null, false)
+        { }
+
+        [Obsolete("This constructor will be removed in a future update, use: new ConsoleHelpPrinter(string indentation, string applicationDescription)")]
+        public ConsoleHelpPrinter(char indentationChar, string applicationDescription) : this(indentationChar.ToString(), applicationDescription, false)
+        { }
+
+
+        [Obsolete("This constructor will be removed in a future update, use: new ConsoleHelpPrinter(string indentation)")]
+        public ConsoleHelpPrinter(char indentationChar) : this(indentationChar.ToString(), null, false)
         { }
 
         /// <summary>
@@ -27,9 +40,9 @@ namespace LunarDoggo.StartOptions.HelpPages
         {
             StringBuilder builder = new StringBuilder();
 
-            if (!String.IsNullOrWhiteSpace(this.applicationDescription))
+            if (!String.IsNullOrWhiteSpace(this.settings.AppDescription))
             {
-                builder.AppendLine(this.applicationDescription);
+                builder.AppendLine(this.settings.AppDescription);
                 builder.AppendLine();
             }
 
@@ -60,12 +73,12 @@ namespace LunarDoggo.StartOptions.HelpPages
             }
             return prefix + option.Name;
         }
-        
+
         protected void AppendGroups(StringBuilder builder, StartOptionParserSettings settings, IEnumerable<StartOptionGroup> groups)
         {
             foreach (StartOptionGroup group in groups)
             {
-                this.AppendIndentedLine(builder, 0, $"{settings.LongOptionNamePrefix}{group.LongName} | {settings.ShortOptionNamePrefix}{group.ShortName} (group)");
+                this.AppendIndentedLine(builder, 0, this.GetGroupFirstLine(group, settings));
                 this.AppendIndentedLine(builder, 1, group.Description);
                 if (group.ValueType != StartOptionValueType.Switch)
                 {
@@ -77,11 +90,30 @@ namespace LunarDoggo.StartOptions.HelpPages
             }
         }
 
+        private string GetGroupFirstLine(StartOptionGroup group, StartOptionParserSettings settings)
+        {
+            const string format = "{0}{2} | {1}{2}{3}(group)";
+
+
+            string shortName = $"{settings.ShortOptionNamePrefix}{group.ShortName}";
+            string longName = $"{settings.LongOptionNamePrefix}{group.LongName}";
+            string indicator = this.GetOptionValueIndicator(group, settings, group.IsValueMandatory);
+
+            switch(group.ValueType)
+            {
+                case StartOptionValueType.Switch: return String.Format(format, longName, shortName, String.Empty, String.Empty);
+                case StartOptionValueType.Single:
+                case StartOptionValueType.Multiple:
+                    return String.Format(format, longName, shortName, indicator, " ");
+                default: throw new NotImplementedException();
+            }
+        }
+
         protected void AppendOptions(StringBuilder builder, StartOptionParserSettings settings, IEnumerable<StartOption> options, int indentation)
         {
             foreach (StartOption option in options)
             {
-                string valueIndicator = this.GetOptionValueIndicator(option, settings);
+                string valueIndicator = this.GetOptionValueIndicator(option, settings, option.IsMandatory);
                 string line = $"{settings.LongOptionNamePrefix}{option.LongName}{valueIndicator} | {settings.ShortOptionNamePrefix}{option.ShortName}{valueIndicator} (option)";
                 this.AppendIndentedLine(builder, indentation, line);
                 this.AppendIndentedLine(builder, indentation + 1, option.Description);
@@ -91,34 +123,54 @@ namespace LunarDoggo.StartOptions.HelpPages
             }
         }
 
-        protected string GetOptionValueIndicator(StartOption option, StartOptionParserSettings settings)
+        protected string GetOptionValueIndicator(BaseStartOption option, StartOptionParserSettings settings, bool mandatory)
         {
             if (option.ValueType == StartOptionValueType.Switch)
             {
                 return String.Empty;
             }
-            string name = option.LongName.ToLower();
-            string valueFormat = option.IsMandatory ? "<{0}>" : "[<{0}>]";
+            string name = this.settings.PrintValueTypes ? (option.ValueParser == null ? "string" : option.ValueParser.ParsedType.Name.ToLower())
+                                                        : "value";
+            string valueFormat = mandatory ? "<{0}>" : "[<{0}>]";
 
-            
+
             if (option.ValueType == StartOptionValueType.Single)
             {
                 return $"{settings.OptionValueSeparator}{String.Format(valueFormat, name)}";
             }
             else
             {
-                IEnumerable<string> names = new[] { 1, 2 }.Select(_int => name + _int);
+                IEnumerable<string> names = new[] { 1, 2 }.Select(_int => name + "_" +  _int);
                 return $"{settings.OptionValueSeparator}{String.Format(valueFormat, String.Join(",", names) + ",...")}";
             }
         }
 
         protected void AppendIndentedLine(StringBuilder builder, int indentation, string message)
         {
-            for (int i = 0; i < indentation; i++)
+            if (!String.IsNullOrWhiteSpace(message))
             {
-                builder.Append(this.indentationChar);
+                for (int i = 0; i < indentation; i++)
+                {
+                    builder.Append(this.settings.Indentation);
+                }
+                builder.AppendLine(message);
             }
-            builder.AppendLine(message);
         }
+    }
+
+    public class ConsoleHelpPrinterSettings
+    {
+        /// <summary>
+        /// Gets or sets the description of your application
+        /// </summary>
+        public string AppDescription { get; set; }
+        /// <summary>
+        /// Gets or sets the char for indenting each level of the help page
+        /// </summary>
+        public string Indentation { get; set; }
+        /// <summary>
+        /// Gets or sets whether the type of <see cref="StartOption"/>s and <see cref="StartOptionGroup"/>s should be printed to the console
+        /// </summary>
+        public bool PrintValueTypes { get; set; }
     }
 }

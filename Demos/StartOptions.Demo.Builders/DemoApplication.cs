@@ -13,7 +13,12 @@ namespace StartOptions.Demo
     public class DemoApplication : AbstractApplication
     {
         private const string appDescription = "This app is intended as a demonstration of the builder based workflow with the LunarDoggo.StartOptions library.";
-        private readonly IHelpPagePrinter helpPrinter = new ConsoleHelpPrinter('\t', appDescription);
+        private readonly IHelpPagePrinter helpPrinter = new ConsoleHelpPrinter(new ConsoleHelpPrinterSettings()
+        {
+            AppDescription = appDescription,
+            PrintValueTypes = true,
+            Indentation = "  "
+        });
 
         protected override void PrintHelpPage(StartOptionParserSettings settings, IEnumerable<HelpOption> helpOptions, IEnumerable<StartOptionGroup> groups, IEnumerable<StartOption> grouplessOptions)
         {
@@ -82,8 +87,8 @@ namespace StartOptions.Demo
 
         private void RunSumUpNumbers(StartOptionGroup group)
         {
-            double[] values = group.GetValue<object[]>().Cast<double>().ToArray();
-            if(values?.Length > 1)
+            double[] values = group.HasValue ? group.GetValue<object[]>().Cast<double>().ToArray() : null;
+            if (values?.Length > 1)
             {
                 Console.WriteLine($"{String.Join(" + ", values)} = {values.Sum()}");
             }
@@ -104,7 +109,7 @@ namespace StartOptions.Demo
             return new[]
             {
                 new StartOptionGroupBuilder("read", "r").SetDescription("Reads the specified file to the console")
-                    .AddOption("path", "p", (_option) => _option.SetDescription("Path to the file").SetValueType(StartOptionValueType.Single).SetMandatory())
+                    .SetValueMandatory(true).SetValueType(StartOptionValueType.Single)
                     .Build(),
                 new StartOptionGroupBuilder("add", "a").SetDescription("Adds two integers together")
                     .AddOption("value-1", "1", (_option) => _option.SetDescription("First value").SetValueType(StartOptionValueType.Single).SetValueParser(new Int32OptionValueParser()).SetMandatory())

@@ -197,6 +197,8 @@ namespace StartOptions.Tests
 
     internal class CalculationOperationValueParser : IStartOptionValueParser
     {
+        public Type ParsedType { get; } = typeof(Int32);
+
         public object ParseValue(string value)
         {
             if (Int32.TryParse(value, out int result))

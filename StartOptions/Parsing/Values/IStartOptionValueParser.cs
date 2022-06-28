@@ -1,7 +1,11 @@
-﻿namespace LunarDoggo.StartOptions.Parsing.Values
+﻿using System;
+
+namespace LunarDoggo.StartOptions.Parsing.Values
 {
     public interface IStartOptionValueParser
     {
+        Type ParsedType { get; }
+
         /// <summary>
         /// Returns the objects parsed from the provided values
         /// </summary>

@@ -8,8 +8,8 @@ namespace StartOptions.Demo
     {
         private readonly string filePath;
 
-        [StartOptionGroup("read", "r", Description = "Reads the specified file to the console")]
-        public ReadFileCommand([StartOption("path", "p", Description = "Path to the file", IsMandatory = true, ValueType = StartOptionValueType.Single)]string path)
+        [StartOptionGroup("read", "r", Description = "Reads the content of the file at the provided path", IsValueMandatory = true, ValueType = StartOptionValueType.Single)]
+        public ReadFileCommand([StartOptionGroupValue]string path)
         {
             this.filePath = path;
         }

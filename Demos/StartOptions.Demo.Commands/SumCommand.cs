@@ -10,9 +10,9 @@ namespace StartOptions.Demo
         private readonly double[] values;
 
         [StartOptionGroup("sum", "s", Description = "Outputs the sum of all provided values", ParserType = typeof(DoubleOptionValueParser), ValueType = StartOptionValueType.Multiple)]
-        public SumCommand([StartOptionGroupValue]object[] values)
+        public SumCommand([StartOptionGroupValue]double[] values)
         {
-            this.values = values.Cast<double>().ToArray();
+            this.values = values;
         }
 
         public void Execute()

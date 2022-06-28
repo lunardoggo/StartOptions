@@ -14,8 +14,6 @@ namespace LunarDoggo.StartOptions
             this.IsValueMandatory = isValueMandatory;
         }
 
-        internal IStartOptionValueParser ValueParser { get { return this.valueParser; } }
-
         /// <summary>
         /// Gets whether the <see cref="StartOptionGroup"/> must be provided with a value.
         /// Note: this property only takes effect, if (<see cref="ValueType"/> != <see cref="StartOptionValueType.Switch"/>)

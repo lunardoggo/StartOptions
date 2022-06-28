@@ -7,6 +7,8 @@ namespace LunarDoggo.StartOptions.Parsing.Values
     {
         private readonly Type parsedType;
 
+        public virtual Type ParsedType { get { return this.parsedType; } }
+
         public AbstractStartOptionValueParser(Type parsedType)
         {
             this.parsedType = parsedType;
