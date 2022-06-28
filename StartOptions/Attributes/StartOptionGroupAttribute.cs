@@ -31,6 +31,12 @@ namespace LunarDoggo.StartOptions
         public string Description { get; set; } = StartOption.DefaultDescription;
 
         /// <summary>
+        /// Gets or seths whether the <see cref="StartOptionGroup"/> must be provided with a value.
+        /// Note: this property only takes effect, if (<see cref="ValueType"/> != <see cref="StartOptionValueType.Switch"/>)
+        /// </summary>
+        public bool IsValueMandatory { get; set; }
+
+        /// <summary>
         /// Returns the short name of the <see cref="StartOptionGroup"/>
         /// </summary>
         public string ShortName { get; }

@@ -223,7 +223,7 @@ namespace LunarDoggo.StartOptions.Reflection
             IStartOptionValueParser parser = StartOptionValueParserRegistry.GetParser(attribute.ParserType);
             return new ConstructorStartOptions()
             {
-                Group = new StartOptionGroup(attribute.LongName, attribute.ShortName, attribute.Description, parser, attribute.ValueType, groupOptionCache),
+                Group = new StartOptionGroup(attribute.LongName, attribute.ShortName, attribute.Description, parser, attribute.ValueType, groupOptionCache, attribute.IsValueMandatory),
                 Options = grouplessOptionCache
             };
         }

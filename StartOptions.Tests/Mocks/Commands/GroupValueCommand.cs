@@ -7,7 +7,7 @@ namespace StartOptions.Tests.Mocks.Commands
 {
     public class GroupValueCommand : IApplicationCommand
     {
-        [StartOptionGroup("sum", "s", ValueType = StartOptionValueType.Multiple, ParserType = typeof(DoubleOptionValueParser))]
+        [StartOptionGroup("sum", "s", ValueType = StartOptionValueType.Multiple, IsValueMandatory = true, ParserType = typeof(DoubleOptionValueParser))]
         public GroupValueCommand([StartOptionGroupValue]object[] values)
         {
             this.Values = values.Cast<double>().ToArray();

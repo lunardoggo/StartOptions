@@ -11,6 +11,7 @@ namespace LunarDoggo.StartOptions.Building
         private IStartOptionValueParser parser = StartOption.DefaultValueParser;
         private StartOptionValueType valueType = StartOption.DefaultValueType;
         private string description = StartOption.DefaultDescription;
+        private bool isValueMandatory;
 
         /// <summary>
         /// Creates a new builder for a <see cref="StartOptionGroup"/> with the provided long and short name
@@ -47,6 +48,16 @@ namespace LunarDoggo.StartOptions.Building
         }
 
         /// <summary>
+        /// Gets or seths whether the <see cref="StartOptionGroup"/> must be provided with a value.
+        /// Note: this property only takes effect, if (<see cref="ValueType"/> != <see cref="StartOptionValueType.Switch"/>)
+        /// </summary>
+        public StartOptionGroupBuilder SetValueMandatory(bool mandatory = true)
+        {
+            this.isValueMandatory = mandatory;
+            return this;
+        }
+
+        /// <summary>
         /// Adds a new <see cref="StartOption"/> to the <see cref="StartOptionGroup"/> with the provided long name, short name and builder
         /// </summary>
         public StartOptionGroupBuilder AddOption(string longName, string shortName, Action<StartOptionBuilder> buildAction)
@@ -71,7 +82,7 @@ namespace LunarDoggo.StartOptions.Building
         /// </summary>
         public override StartOptionGroup Build()
         {
-            return new StartOptionGroup(this.longName, this.shortName, this.description, this.parser, this.valueType, this.options);
+            return new StartOptionGroup(this.longName, this.shortName, this.description, this.parser, this.valueType, this.options, this.isValueMandatory);
         }
 
         private void CheckForNameDuplications(StartOption newOption)

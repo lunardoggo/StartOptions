@@ -19,6 +19,7 @@ namespace StartOptions.Tests
 
             Assert.Equal(StartOptionValueType.Switch, group.ValueType);
             Assert.Equal("long", group.LongName);
+            Assert.False(group.IsValueMandatory);
             Assert.Equal("s", group.ShortName);
             Assert.Null(group.Description);
             Assert.False(group.HasValue);
@@ -32,6 +33,7 @@ namespace StartOptions.Tests
             StartOptionGroupBuilder builder = new StartOptionGroupBuilder("long", "s")
                 .AddOption("second-option", "so", (_builder) => _builder.SetDescription("Second option"))
                 .SetDescription("Group description")
+                .SetValueMandatory()
                 .AddOption(option);
 
             StartOptionGroup group = builder.Build();
@@ -40,6 +42,7 @@ namespace StartOptions.Tests
             Assert.Equal("long", group.LongName);
             Assert.Equal("s", group.ShortName);
             Assert.Equal(2, group.Options.Count());
+            Assert.True(group.IsValueMandatory);
             Assert.False(group.HasValue);
 
             this.AssertHasOption(group, "fo");

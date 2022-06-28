@@ -72,6 +72,18 @@ namespace StartOptions.Tests
         }
 
         [Fact]
+        public void TestIsValueMandatory()
+        {
+            ApplicationStartOptions firstOptions = this.GetDefaultReflectionHelper().GetStartOptions(typeof(GroupValueCommand));
+            ApplicationStartOptions secondOptions = this.GetDefaultReflectionHelper().GetStartOptions(typeof(SearchCommand));
+            ApplicationStartOptions thirdOptions = this.GetDefaultReflectionHelper().GetStartOptions(typeof(BasicMockCommand));
+
+            Assert.True(firstOptions.StartOptionGroups.Single().IsValueMandatory);
+            Assert.False(secondOptions.StartOptionGroups.Single().IsValueMandatory);
+            Assert.False(thirdOptions.StartOptionGroups.Single().IsValueMandatory);
+        }
+
+        [Fact]
         public void TestConstructorNameConflicts()
         {
             ReflectionHelper helper = this.GetDefaultReflectionHelper();

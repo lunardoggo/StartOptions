@@ -181,6 +181,19 @@ namespace StartOptions.Tests
             AssertionUtility.Array(new int[] { 1 }, group.GetValue<int[]>());
         }
 
+        [Fact]
+        public void TestIsValueMandatory()
+        {
+            StartOptionParser parser = this.GetOptionParserWithRequiredOptions(StartOptionValueType.Single, null);
+
+            Assert.Throws<ArgumentException>(() => parser.Parse(new string[] { "-g", "-gr", "-r" }));
+            Assert.Throws<OptionRequirementException>(() => parser.Parse(new string[] { "-g2" }));
+
+            ParsedStartOptions parsed = parser.Parse(new string[] { "-g2", "-r" });
+            Assert.NotNull(parsed.ParsedOptionGroup);
+            Assert.False(parsed.ParsedOptionGroup.HasValue);
+        }
+
         private StartOptionParser GetOptionParserWithRequiredOptions(StartOptionValueType groupValueType = StartOptionValueType.Switch, IStartOptionValueParser groupValueParser = null)
         {
             StartOptionGroup[] groups = new StartOptionGroup[]
@@ -190,6 +203,12 @@ namespace StartOptions.Tests
                     .SetValueType(groupValueType)
                     .AddOption("groupOptional", "go", _builder => _builder.SetMandatory(false))
                     .AddOption("groupRequired", "gr", _builder => _builder.SetMandatory(true))
+                    .SetValueMandatory()
+                    .Build(),
+                new StartOptionGroupBuilder("group2", "g2")
+                    .SetValueParser(groupValueParser)
+                    .SetValueType(groupValueType)
+                    .SetValueMandatory(false)
                     .Build()
             };
 

@@ -172,6 +172,27 @@ namespace StartOptions.Tests
 
             return new ReflectionHelper(helpOptions, settings, null);
         }
+
+        [Fact]
+        public void TestInstantiateWithMissingValues()
+        {
+            ReflectionHelper helper = this.GetReflectionHelperWithDependencies(true);
+            ApplicationStartOptions options = helper.GetStartOptions(typeof(GroupValueCommand));
+            StartOptionParser parser = new StartOptionParser(options.StartOptionParserSettings, options.StartOptionGroups, options.GrouplessStartOptions, options.HelpOptions);
+
+            Assert.Throws<ArgumentException>(() => parser.Parse(new string[] { "-s" }));
+        }
+
+        [Fact]
+        public void TestInstantiateWithOptionalValues()
+        {
+            ReflectionHelper helper = this.GetReflectionHelperWithDependencies(true);
+            ParsedStartOptions termOptions = this.GetParsedStartOptions(helper, new string[] { "-s=term" }, typeof(SearchCommand));
+            ParsedStartOptions nullOptions = this.GetParsedStartOptions(helper, new string[] { "-s" }, typeof(SearchCommand));
+
+            Assert.Equal("term", (helper.Instantiate(termOptions) as SearchCommand).SearchTerm);
+            Assert.Null((helper.Instantiate(nullOptions) as SearchCommand).SearchTerm);
+        }
     }
 
     internal class CalculationOperationValueParser : IStartOptionValueParser

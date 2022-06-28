@@ -156,7 +156,7 @@ namespace LunarDoggo.StartOptions.Parsing
                 KeyValuePair<StartOptionGroup, ParsedStartArgument> pair = groups.Single();
                 StartOptionGroup group = pair.Key;
                 IEnumerable<StartOption> options = this.GetStartOptions(group.Options, ref parsedOptions);
-                StartOptionGroup output = new StartOptionGroup(group.LongName, group.ShortName, group.Description, group.ValueParser, group.ValueType, options);
+                StartOptionGroup output = new StartOptionGroup(group.LongName, group.ShortName, group.Description, group.ValueParser, group.ValueType, options, group.IsValueMandatory);
                 this.ParseOptionValue(output, pair.Value.Value);
                 return output;
             }
@@ -201,7 +201,14 @@ namespace LunarDoggo.StartOptions.Parsing
             //TODO: Throw Exception if option has value type mismatch (i.e. Switch or is single but got multiple values)
             if (option.ValueType != StartOptionValueType.Switch)
             {
-                if (value.Contains(this.startOptions.StartOptionParserSettings.MultipleValueSeparator))
+                if (value == null)
+                {
+                    if (option is StartOptionGroup group && group.IsValueMandatory || !(option is StartOptionGroup))
+                    {
+                        throw new ArgumentException($"The options \"{option.LongName}\" requires a value to be set");
+                    }
+                }
+                else if (value.Contains(this.startOptions.StartOptionParserSettings.MultipleValueSeparator))
                 {
                     option.ParseMultipleValues(value.Split(new char[] { this.startOptions.StartOptionParserSettings.MultipleValueSeparator }, StringSplitOptions.RemoveEmptyEntries));
                 }
