@@ -1,37 +1,13 @@
-# StartOptions
-Library for parsing commandline start options for .net and .net-core applications (.net-standard 1.3)
----
-# Terminology
-A [StartOption](https://github.com/lunardoggo/StartOptions/wiki/StartOption) is a single commandline argument that may contain values. StartOptions can either be grouped by StartOptionGroups or be groupless and can therefore be used for global flags, such as `verbose` or `debug`.
+LunarDoggo.StartOptions
+============
+[![License](https://img.shields.io/github/license/LunarDoggo/StartOptions)](https://github.com/lunardoggo/StartOptions/blob/main/LICENSE)
+[![Nuget](https://img.shields.io/nuget/vpre/LunarDoggo.StartOptions)](https://www.nuget.org/packages/LunarDoggo.StartOptions/)
+![Nuget](https://img.shields.io/nuget/dt/LunarDoggo.StartOptions)
 
-A [StartOptionGroup](https://github.com/lunardoggo/StartOptions/wiki/StartOptionGroup) is a grouping of `StartOption`s, it has a specific name associated with it. The StartOptionGroup commandline argument always is of type `Switch`, it additionally requires at least one subordinate StartOption to be defined. Also note that you can only use one StartOptionGroup at once when calling your application.
-
-A [StartOptionParser](https://github.com/lunardoggo/StartOptions/wiki/StartOptionParser) takes the commandline arguments and parses them into an optional `StartOptionGroup` and `StartOption`s which you can use to determine the inputs from the cli. If you use either of the two approaches mentioned in the section **Getting started** you don't need to use this class.
-
-[AbstractApplication](https://github.com/lunardoggo/StartOptions/wiki/AbstractApplication) is a base type that creates a StartOptionParser, passes your application's commandline arguments to it and handles its output using the builder-approach mentioned below. You must override the following methods:
-```csharp
-//Prints your help-page if the commandline arguments containes a HelpOption
-protected abstract void PrintHelpPage(StartOptionParserSettings settings, IEnumerable<HelpOption> helpOptions, IEnumerable<StartOptionGroup> groups, IEnumerable<StartOption> grouplessOptions);
-
-//Runs your application code with the parsed StartOptionGroup and groupless StartOptions
-protected abstract void Run(StartOptionGroup selectedGroup, IEnumerable<StartOption> selectedGrouplessOptions);
-
-//Gets the ApplicationStartOptions for the StartOptionParser-creation
-protected abstract ApplicationStartOptions GetApplicationStartOptions();
-```
-[CommandApplication](https://github.com/lunardoggo/StartOptions/wiki/CommandApplication) is a base type that does the same thing as `AbstractApplication`, but with the attribute-based approach mentioned below. You must override the following methods:
-```csharp
-//Prints your help-page if the commandline arguments containes a HelpOption
-protected abstract void PrintHelpPage(StartOptionParserSettings settings, IEnumerable<HelpOption> helpOptions, IEnumerable<StartOptionGroup> groups, IEnumerable<StartOption> grouplessOptions);
-
-//Get the types of all commands your appllication supports
-protected abstract Type[] GetCommandTypes();
-```
-[ApplicationStartOptions](https://github.com/lunardoggo/StartOptions/wiki/ApplicationStartOptions) is a container used by an `AbstractApplication` or a `CommandApplication` in order to provide the `StartOptionParser` with its parameters. It is just a simple container for `StartOptionGroups`, groupless `StartOptions`, `HelpOptions` and [StartOptionParserSettings](https://github.com/lunardoggo/StartOptions/wiki/StartOptionParserSettings)
-
+Library for parsing commandline arguments into much more managable [StartOptions](https://github.com/lunardoggo/StartOptions/wiki/StartOption) and [StartOptionGroups](https://github.com/lunardoggo/StartOptions/wiki/StartOptionGroup) for .net and .net-core applications (.net-standard 1.3). For detailed information take a look this repository's [wiki](https://github.com/lunardoggo/StartOptions/wiki).
 ---
 
-# Getting started
+# Usage
 The first step to using this library is to install the lates version of the [nuget package](https://www.nuget.org/packages/LunarDoggo.StartOptions/) for your project,
 for example by using the package manager console in Visual Studio:
 ```powershell
@@ -42,8 +18,9 @@ This library provides two distinct ways for customizing your application's comma
   * by utilizing attributes
   * by building the StartOptions yourself
 
-### 1. Using the attribute-based approach
-If you chose the attribute-based approach, first create some classes that implement the interface `IApplicationCommand`, make sure to define at least one constructor per class that is decorated with the [StartOptionGroupAttribute](https://github.com/lunardoggo/StartOptions/wiki/StartOptionGroupAttribute) and contains parameters that are decorated with the [StartOptionAttribute](https://github.com/lunardoggo/StartOptions/wiki/StartOptionAttribute). If you want to add constructor parameters that aren't decorated with a StartOptionAttribute, you have to provide an [IDependencyProvider](https://github.com/lunardoggo/StartOptions/wiki/DependencyProvider). The method `Execute()` contains the code that will run the command:
+### [1. Using the attribute-based approach](https://github.com/lunardoggo/StartOptions/tree/main/Demos/StartOptions.Demo.Commands)
+At first create some classes that implement the interface `IApplicationCommand`, make sure to define at least one constructor per class that is decorated with the [StartOptionGroupAttribute](https://github.com/lunardoggo/StartOptions/wiki/StartOptionGroupAttribute) and contains parameters that are decorated with the
+[StartOptionGroupValueAttribute](https://github.com/lunardoggo/StartOptions/wiki/StartOptionGroupValueAttribute), [StartOptionAttribute](https://github.com/lunardoggo/StartOptions/wiki/StartOptionAttribute), [GrouplessStartOptionAttribute](https://github.com/lunardoggo/StartOptions/wiki/GrouplessStartOptionAttribute) or [GrouplessStartOptionReferenceAttribute](https://github.com/lunardoggo/StartOptions/wiki/GrouplessStartOptionAttributeReference). If you want to add constructor parameters that aren't decorated with any of these attributes, you have to provide an [IDependencyProvider](https://github.com/lunardoggo/StartOptions/wiki/DependencyProvider). The method `Execute()` contains the code that will run the command:
 ```csharp
 public class AddCommand : IApplicationCommand
 {
@@ -51,10 +28,12 @@ public class AddCommand : IApplicationCommand
 
     [StartOptionGroup("add", "a", Description = "Adds two integers together")]
     public AddCommand([StartOption("value-1", "1", Description = "First value", Mandatory = true, ValueType = StartOptionValueType.Single, ParserType = typeof(Int32OptionValueParser))] int firstValue,
-                        [StartOption("value-2", "2", Description = "Second value", Mandatory = true, ValueType = StartOptionValueType.Single, ParserType = typeof(Int32OptionValueParser))] int secondValue)
+                        [StartOption("value-2", "2", Description = "Second value", Mandatory = true, ValueType = StartOptionValueType.Single, ParserType = typeof(Int32OptionValueParser))] int secondValue,
+                        [GrouplessStartOption("verbose", "v")]bool verbose)
     {
         this.secondValue = secondValue;
         this.firstValue = firstValue;
+        //do something with the verbose switch
     }
 
     public void Execute()
@@ -63,7 +42,7 @@ public class AddCommand : IApplicationCommand
     }
 }
 ```
-**Note**: See **Final notes and hints** below to learn how to implement groupless StartOptions.
+**Note:** If you want to use the same groupless `StartOption` across multiple constructors/commands, take a look at the section `Final notes and hints` below.
 
 After you created all the commands you want to use, create a new class that inherits from `CommandApplication` and override its abstract methods:
 ```csharp
@@ -94,12 +73,12 @@ protected override void PrintHelpPage(StartOptionParserSettings settings, IEnume
     new ConsoleHelpPrinter('\t').Print(settings, helpOptions, groups, grouplessOptions);
 }
 ```
-### 2. Using StartOptionGroup- and StartOption-builders
+### [2. Using StartOptionGroup- and StartOption-builders](https://github.com/lunardoggo/StartOptions/tree/main/Demos/StartOptions.Demo.Builders)
 If you picked the builder-based approach, create a new class that inherits from `AbstractApplication` and override its abstract methods:
 ```csharp
 class DemoApplication : AbstractApplication
 ```
-Set your ApplicationStartOptions inside of `GetApplicationStartOptions`, note that valid StartOption names must start with either a letter or a number and can only contain letters, numbers, underscores and hyphens/dashes. Also note, that you can also provide custom HelpOptions and StartOptionParserSettings in this method (see Demo-Project):
+Set your ApplicationStartOptions inside of `GetApplicationStartOptions`, note that valid StartOption names must start with either a letter or a number and can only contain letters, numbers, underscores and hyphens/dashes. Also note, that you can also provide custom HelpOptions and StartOptionParserSettings in this method (see [Demo-Project]((https://github.com/lunardoggo/StartOptions/tree/main/Demos/StartOptions.Demo.Builders))):
 ```csharp
 protected override ApplicationStartOptions GetApplicationStartOptions()
 {
@@ -119,14 +98,14 @@ protected override ApplicationStartOptions GetApplicationStartOptions()
     return new ApplicationStartOptions(groups, grouplessOptions);
 }
 ```
-Set the logic for printing help-pages inside of `PrintHelpPage`. You can use the predefined class `ConsoleHelpPrinter` or define your own method of displaying a help page to your user:
+Implement the logic for printing help-pages inside of `PrintHelpPage`. You can use the predefined class `ConsoleHelpPrinter` as shown below or define your own method of displaying a help page to your users:
 ```csharp
 protected override void PrintHelpPage(StartOptionParserSettings settings, IEnumerable<HelpOption> helpOptions, IEnumerable<StartOptionGroup> groups, IEnumerable<StartOption> grouplessOptions)
 {
     new ConsoleHelpPrinter('\t').Print(settings, helpOptions, groups, grouplessOptions);
 }
 ```
-Set the logic of the execution of your application inside of `Run`:
+Implement the logic of the execution of your application inside of `Run`:
 ```csharp
 protected override void Run(StartOptionGroup selectedGroup, IEnumerable<StartOption> selectedGrouplessOptions)
 {
@@ -181,8 +160,31 @@ In this example, your application will be using the "add"-StartOptionGroup with 
 
 ---
 
+### Parsing values of any type
+By default your `StartOptions` will parse arguments as `strings`. If you wish to parse the provided command line argument into another type, you have to specify the parser type as shown above. The library ships with these predefined parsers:
+  * `BoolOptionValueParser`
+  * `ByteOptionValueParser`
+  * `DoubleOptionValueParser`
+  * `FloatOptionValueParser`
+  * `Int16OptionValueParser`
+  * `Int32OptionValueParser`
+  * `Int64OptionValueParser`
+
+**Note:** `FloatOptionValueParser` as well as `DoubleOptionValueParser` use the current system culture as the source of the floating point number format.
+
+You can create custom [IStartOptionValueParsers](https://github.com/lunardoggo/StartOptions/wiki/IStartOptionValueParser) for any type you like by inheriting from `AbstractStartOptionValueParser`
+  
+**If you are using the command-based approach**, make sure to register your custom value parser by calling before executing the `Run` method of your application:
+```csharp
+var instance = new CustomOptionValueParser();
+StartOptionValueParserRegistry.Register(instance);
+```
+
+---
+
 ### Final notes and hints
-1. Please note, that the help printer by default only displays all options if your commandline arguments only contained HelpOptions if they contained StartOptions or StartOptionGroups, the help page will only contain descriptions to the provided options. To change this behaviour, override the following Method in your Application-class:
+1. Please note, that the help printer by default will display all available `StartOptions` **only** if the commandline arguments provided by the user only contained `HelpOptions` and nothing else. If there are `StartOptions` or `StartOptionGroups` contained in the command line arguments, the help page will only contain these options.
+In order to change that, override the following method and provide the `PrintHelpPage` method with all available `StartOptions` and `StartOptionGroups`:
 ```csharp
 protected override void PrintHelpPage(ParsedStartOptions parsed)
 {
@@ -195,31 +197,8 @@ protected override void PrintHelpPage(ParsedStartOptions parsed)
     this.PrintHelpPage(settings, helpOptions, groups, options);
 }
 ```
-2. If you wish to parse command line arguments in the **command-based approach** that are not of type `string`, you must specify the parser a `StartOption` should use to parse its values:
-```csharp
-[StartOptionGroup("add", "a", Description = "Adds two integers together")]
-public AddCommand([StartOption("value-1", "1", Description = "First value", Mandatory = true, ValueType = StartOptionValueType.Single, ParserType = typeof(Int32OptionValueParser))] int firstValue,
-                    [StartOption("value-2", "2", Description = "Second value", Mandatory = true, ValueType = StartOptionValueType.Single, ParserType = typeof(Int32OptionValueParser))] int secondValue)
-{
-    this.secondValue = secondValue;
-    this.firstValue = firstValue;
-}
-```
-3. If you wish to implement a custom `IStartOptionValueParser` with the **command-based approach** you must register your custom parser in the `StartOptionValueParserRegistry` before using it:
-```csharp
-class CustomOptionValueParser : AbstractStartOptionValueParser
-{
-    ...
-}
 
-static void Main(string[] args)
-{
-    StartOptionValueParserRegistry.Register(new CustomOptionValueParser());
-    DemoApplication application = new DemoApplication();
-    application.Run(args);
-}
-```
-4. If you wish to use the same groupless `StartOption` with the **command-based approach** across multiple different constructors or classes, at first implement one command with a constructor parameter decorated with `GrouplessStartOptionAttribute` and another one (another constructor in the same or a different class) decorated with `GrouplessStartOptionReferenceAttribute`. Make sure that no groupless start options use duplicate names:
+2. If you wish to use the same groupless `StartOption` with the **command-based approach** across multiple different constructors or classes, at first implement one command with a constructor parameter decorated with `GrouplessStartOptionAttribute` and another one (another constructor in the same or a different class) decorated with `GrouplessStartOptionReferenceAttribute`. Make sure that no groupless start options use duplicate names:
 ```csharp
 class FirstCommand : ApplicationCommand
 {
@@ -242,7 +221,7 @@ class SecondCommand : ApplicationCommand
 }
 ```
 
-4. 1 You can also decorate your `CommandApplication` or any of your `IApplicationCommand` implementations with `GrouplessStartOptionAttribute` if you prefer your grouless StartOptions to be declared in a central location:
+2. 1 You can also decorate your `CommandApplication` or any of your `IApplicationCommand` implementations with `GrouplessStartOptionAttribute` if you prefer your grouless StartOptions to be declared in a central location:
 ```csharp
 [GrouplessStartOption("verbose", "v", Description = "Enable verbose output")]
 public class DemoApplication : CommandApplication
@@ -262,7 +241,7 @@ public class DemoCommand : IApplicationCommand
 }
 ```
 
-5. If you want to handle groupless StartOptions of your `CommandApplication` in a central location, you can attach handlers to your application (note: right now you can only attach one handler per groupless StartOption) by using these methods either in your application's constructor or from outside your application class:
+3. If you want to handle groupless StartOptions of your `CommandApplication` in a central location, you can attach handlers to your application (note: right now you can only attach one handler per groupless StartOption) by using these methods either in your application's constructor or from outside your application class:
 ```csharp
 CommandApplication app = new DemoApplication();
 //for groupless StartOptions of type Multiple
@@ -272,3 +251,5 @@ app.AddGlobalGrouplessStartOptionHandler<T>("user", (string _username) => this.U
 //for groupless StartOptions of type Switch
 app.AddGlobalGrouplessStartOptionHandler("verbose", () => this.Verbose = true);
 ```
+
+4. **Caveat when using "/" as a prefix:** Please keep in mind that the prefix "/" for short or long StartOption names can conflict with certain CLI environments, such as git bash for Windows, which could interpret options starting with a "/" as an absolute path to a file or application instead of just a simple string that should be passed to your application.
