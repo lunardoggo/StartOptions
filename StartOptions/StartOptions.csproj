@@ -19,10 +19,14 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon></PackageIcon>
     <FileVersion>1.0.0</FileVersion>
-	<VersionPrefix>1.1.0-preview.20220622</VersionPrefix>
-	<PackageVersion>1.1.0-preview.20220622</PackageVersion>
+	<VersionPrefix>1.1.0</VersionPrefix>
+	<PackageVersion>1.1.0</PackageVersion>
     <AssemblyVersion>1.1.0</AssemblyVersion>
-	<PackageReleaseNotes>Added global groupless start option handling for CommandApplications, GrouplessStartOptionAttribute can now decorate CommandApplications; note: the new parts of the library may contain undiscovered major bugs</PackageReleaseNotes>
+	<PackageReleaseNotes>- added attribute based approach to defining StartOptions
+- added further configuration options for ConsoleHelpPrinter
+- made naming sceme more uniform
+- added StartOptionGroups with values
+- minor fixes of the parsing and validation routine</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
